@@ -27,7 +27,7 @@ PS5 consoles and racing simulators have no agent. Staff start and end those sess
 
 ## Money and time
 
-These rules are decided and not implemented yet.
+Money is stored as integer paise. ₹150 is `15000`. The catalog tables and seed are in place. Session snapshots and the charge calculation are not built yet.
 
 - Money is integer paise. ₹150 is `15000`.
 - Session start copies the active price into an immutable snapshot.

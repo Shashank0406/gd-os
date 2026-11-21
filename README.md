@@ -13,16 +13,16 @@ Development happens on macOS. The café installation runs on Windows. Docker Com
 | Gaming PC agent | Simulator on the Mac, later | Native Windows service on each diskless PC |
 | CCBoot | Not involved | PXE boot, images, write-back. GD OS does not replace it |
 
-## Day 1 status
+## Current status
 
 Working now:
 
-- Repository layout
-- `GET /health` on the API
-- PostgreSQL 16 service definition with a named volume
-- One automated health test
+- `GET /health` and `GET /ready`
+- PostgreSQL catalog for stations, hourly rates, and packages
+- Seed data for the 15 PCs, 3 PS5s, 2 simulators, and the cashier workstation
+- Prices stored as paise and read back from the database
 
-Not built yet: database schema, login, pricing, sessions, cashier UI, Windows agent.
+Not built yet: staff login, session billing, cashier UI, Windows agent.
 
 ## Run the health check on this Mac
 

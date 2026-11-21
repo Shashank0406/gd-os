@@ -1,6 +1,8 @@
 # Security
 
-Day 1 has no accounts, no sessions, and no agent commands. The notes below are the rules for the work that follows.
+There are still no accounts. `GET /stations` and `GET /pricing` are open on the LAN until staff login exists. They cannot change a price.
+
+The notes below are the rules for the work that follows.
 
 - Passwords will be hashed with Argon2id. Plaintext passwords are never stored.
 - Secrets live in `.env`, which is gitignored. `.env.example` contains placeholders only.

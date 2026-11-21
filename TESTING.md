@@ -6,8 +6,10 @@ Evidence for the current milestone only. A passing health check is not productio
 
 | Check | Result | Evidence |
 |---|---|---|
-| `GET /health` returns GD OS identity and a UTC timestamp | Passed on the Mac, 19 Nov 2026. `pytest`: 1 passed. | `backend/tests/test_health.py` |
-| Docker Compose health on this Mac | Passed. `curl http://localhost:8000/health` returned `status: ok` after `docker compose up -d --build`. PostgreSQL reported healthy. | Local Docker Desktop 29.8. This does not prove a Windows reboot. |
+| `GET /health` returns GD OS identity and a UTC timestamp | Passed on the Mac, 19 Nov 2026. | `backend/tests/test_health.py` |
+| Docker Compose health on this Mac | Passed on 19 Nov 2026. | Local Docker Desktop 29.8. This does not prove a Windows reboot. |
+| Catalog seed, cashier exclusion, single default price, edited price kept, pricing API reads the database | Passed on the Mac, 22 Nov 2026. `pytest`: 7 passed. | `backend/tests/test_catalog.py` against database `gdos_test` |
+| Live API catalog after container start | Passed on the Mac, 22 Nov 2026. `/ready` connected. `/pricing` returned ₹150, ₹250, and ₹800. `/stations` returned 21 stations and `CASHIER-01` was not billable. | `docker compose up -d --build` |
 
 ## Not run
 

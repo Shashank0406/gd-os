@@ -28,12 +28,12 @@ class TokenOut(BaseModel):
 @router.post("/login", response_model=TokenOut)
 def login(body: LoginIn, request: Request, db: Session = Depends(get_db)) -> TokenOut:
     client_key = request.client.host if request.client else "unknown"
-    login_limiter.check(client_key)
+    login_limiter.check(f"staff:{client_key}")
     username = body.username.strip().lower()
     user = db.scalar(select(User).options(joinedload(User.role)).where(User.username == username))
     password_ok = verify_password(body.password, user.password_hash if user else dummy_password_hash())
     if user is None or not user.is_active or not password_ok:
-        login_limiter.record_failure(client_key)
+        login_limiter.record_failure(f"staff:{client_key}")
         record_audit(
             db,
             actor=user if user is not None and user.is_active else None,
@@ -46,7 +46,7 @@ def login(body: LoginIn, request: Request, db: Session = Depends(get_db)) -> Tok
         db.commit()
         raise HTTPException(status_code=401, detail="Invalid username or password")
 
-    token, expires_in = create_access_token(user.id)
+    token, expires_in = create_access_token(user.id, kind="staff")
     record_audit(
         db,
         actor=user,

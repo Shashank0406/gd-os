@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.0 — Customer accounts
+
+- Customers register and sign in with a username and password. There is no OTP login.
+- Mobile numbers are stored as 10 digits so a cashier can find a customer.
+- A cashier can register a walk-in without a password.
+- A customer token cannot call staff routes, and a staff token cannot open the customer profile.
+
 ## 0.3.0 — Staff login and permissions
 
 - Staff sign in with a username and an Argon2id password hash.

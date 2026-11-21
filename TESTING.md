@@ -12,6 +12,7 @@ Evidence for the current milestone only. A passing health check is not productio
 | Live API catalog after container start | Passed on the Mac, 22 Nov 2026. `/ready` connected. `/stations` returned 21 stations and `CASHIER-01` was not billable. | `docker compose up -d --build` |
 | Prices stored and returned in rupees | Passed on the Mac, 22 Nov 2026. Live `/pricing` returned `150.00`, `250.00`, and `800.00`. Existing rows were converted by migration `0002_prices_in_rupees`. | `backend/tests/test_catalog.py` and `GET /pricing` |
 | Staff login, hashed passwords, cashier price block, admin price audit, manager staff block, rate limit, placeholder JWT secret | Passed on the Mac, 22 Nov 2026. `pytest`: 16 passed. | `backend/tests/test_auth.py` |
+| Customer register, login, duplicate mobile, cashier walk-in search, customer and staff tokens stay separate | Passed on the Mac, 22 Nov 2026. `pytest`: 20 passed. | `backend/tests/test_customers.py` |
 
 ## Not run
 
@@ -35,4 +36,4 @@ pytest
 
 The health test uses FastAPI's in-process client. It does not need Docker or Windows.
 | Live staff login | Passed on the Mac, 22 Nov 2026. `/pricing` without a token returned 401. Login as `admin` returned `SUPER_ADMIN`. The same token read the PC rate `150.00`. |
-
+| Live customer registration | Passed on the Mac, 22 Nov 2026. `POST /customers/register` returned 201. `GET /customers/me` returned mobile `9988776655`. `POST /customers/otp/request` returned 404. |

@@ -3,8 +3,9 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload
 
-from app.core.security import decode_user_id
+from app.core.security import decode_subject
 from app.db.session import get_db
+from app.models.customer import Customer
 from app.models.identity import User
 from app.services.access import permissions_for
 
@@ -17,7 +18,7 @@ def get_current_user(
 ) -> User:
     if credentials is None or credentials.scheme.lower() != "bearer":
         raise HTTPException(status_code=401, detail="Not authenticated")
-    user_id = decode_user_id(credentials.credentials)
+    user_id = decode_subject(credentials.credentials, expected_kind="staff")
     user = db.scalar(select(User).options(joinedload(User.role)).where(User.id == user_id))
     if user is None or not user.is_active:
         raise HTTPException(status_code=401, detail="Not authenticated")
@@ -31,3 +32,16 @@ def require_permission(code: str):
         return user
 
     return dependency
+
+
+def get_current_customer(
+    credentials: HTTPAuthorizationCredentials | None = Depends(_bearer),
+    db: Session = Depends(get_db),
+) -> Customer:
+    if credentials is None or credentials.scheme.lower() != "bearer":
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    customer_id = decode_subject(credentials.credentials, expected_kind="customer")
+    customer = db.get(Customer, customer_id)
+    if customer is None or not customer.is_active:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    return customer

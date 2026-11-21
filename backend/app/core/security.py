@@ -38,21 +38,25 @@ def require_jwt_secret() -> str:
     return secret
 
 
-def create_access_token(user_id: uuid.UUID) -> tuple[str, int]:
+def create_access_token(user_id: uuid.UUID, *, kind: str) -> tuple[str, int]:
     settings = get_settings()
     expires_in = settings.jwt_ttl_hours * 3600
     expires_at = datetime.now(timezone.utc) + timedelta(seconds=expires_in)
     token = jwt.encode(
-        {"sub": str(user_id), "exp": expires_at},
+        {"sub": str(user_id), "kind": kind, "exp": expires_at},
         require_jwt_secret(),
         algorithm="HS256",
     )
     return token, expires_in
 
 
-def decode_user_id(token: str) -> uuid.UUID:
+def decode_subject(token: str, *, expected_kind: str) -> uuid.UUID:
     try:
         payload = jwt.decode(token, require_jwt_secret(), algorithms=["HS256"])
+        if payload.get("kind") != expected_kind:
+            raise HTTPException(status_code=401, detail="Invalid or expired token")
         return uuid.UUID(payload["sub"])
+    except HTTPException:
+        raise
     except (jwt.PyJWTError, ValueError, KeyError) as exc:
         raise HTTPException(status_code=401, detail="Invalid or expired token") from exc

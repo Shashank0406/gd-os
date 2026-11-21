@@ -14,12 +14,14 @@ PERMISSIONS: tuple[str, ...] = (
     "staff.read",
     "staff.write",
     "audit.read",
+    "customers.read",
+    "customers.write",
 )
 
 ROLE_PERMISSIONS: dict[str, tuple[str, ...]] = {
     "SUPER_ADMIN": PERMISSIONS,
-    "MANAGER": ("stations.read", "pricing.read", "staff.read", "audit.read"),
-    "CASHIER": ("stations.read", "pricing.read"),
+    "MANAGER": ("stations.read", "pricing.read", "staff.read", "audit.read", "customers.read", "customers.write"),
+    "CASHIER": ("stations.read", "pricing.read", "customers.read", "customers.write"),
 }
 
 

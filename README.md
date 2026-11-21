@@ -22,8 +22,9 @@ Working now:
 - Seed data for the 15 PCs, 3 PS5s, 2 simulators, and the cashier workstation
 - Prices stored in rupees (`150.00`) and read back from the database
 - Staff login with Argon2id passwords, roles, and an audit log
+- Customer registration and username login, plus cashier walk-in registration
 
-Not built yet: customer login, session billing, cashier UI, Windows agent.
+Not built yet: session billing, cashier UI, Windows agent.
 
 ## Run the health check on this Mac
 

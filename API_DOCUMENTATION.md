@@ -33,6 +33,26 @@ Staff username and password. Returns a bearer token. The password is checked wit
 
 `JWT_SECRET` must be set to a value other than `change-me`. A shift token lasts 12 hours.
 
+## POST /customers/register
+
+Public on the café LAN. Body: `username`, `password`, `display_name`, `mobile`. The password is hashed with Argon2id. The response includes a customer token. There is no OTP route.
+
+## POST /customers/login
+
+Username and password. A walk-in with no password cannot sign in. Unknown users and wrong passwords return the same `401`.
+
+## GET /customers/me
+
+Requires a customer token. A staff token is rejected.
+
+## POST /customers
+
+Requires `customers.write`. A cashier registers a walk-in with `display_name` and `mobile`. Username and password are optional.
+
+## GET /customers/search?mobile=
+
+Requires `customers.read`. Accepts `9876543210` or `+91 9876543210` and returns the matching customer.
+
 ## GET /stations
 
 Requires a staff token with `stations.read`. Returns the 21 seeded stations. `CASHIER-01` has `is_billable: false` and `is_customer_station: false`.

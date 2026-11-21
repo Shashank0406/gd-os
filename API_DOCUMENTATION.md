@@ -53,6 +53,22 @@ Requires `customers.write`. A cashier registers a walk-in with `display_name` an
 
 Requires `customers.read`. Accepts `9876543210` or `+91 9876543210` and returns the matching customer.
 
+## POST /sessions
+
+Requires `sessions.operate`. Starts a session on an available customer station. `CASHIER-01` is rejected. `billing_mode` is `POSTPAID`, `PREPAID`, or `FREE_PLAY`. Prepaid hourly needs `duration_seconds` and a payment method. A package needs `package_code`. The response includes the saved hourly rate and the start time in UTC and Asia/Kolkata.
+
+## POST /sessions/{id}/extend
+
+Adds time. A prepaid extension is charged immediately from the saved hourly rate. A postpaid extension only moves the planned end.
+
+## POST /sessions/{id}/end
+
+Closes the session using the server clock. The final rupee amount uses the price saved at the start. The balance is recorded as cash, UPI, or card.
+
+## GET /sessions/active
+
+Requires `sessions.read`. Lists sessions that are still open.
+
 ## GET /stations
 
 Requires a staff token with `stations.read`. Returns the 21 seeded stations. `CASHIER-01` has `is_billable: false` and `is_customer_station: false`.

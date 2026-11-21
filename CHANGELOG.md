@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.0 — Session and billing engine
+
+- One session engine covers PCs, PS5s, and simulators.
+- Postpaid, prepaid hourly, prepaid packages, and free play are calculated in rupees on the server clock.
+- A running session keeps the price from when it started.
+- A station and a customer can each have only one active session. The cashier workstation cannot be billed.
+- Ending early does not refund a prepaid package. Time past the purchased block is billed from the saved hourly rate.
+
 ## 0.4.0 — Customer accounts
 
 - Customers register and sign in with a username and password. There is no OTP login.

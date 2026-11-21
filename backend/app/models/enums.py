@@ -15,3 +15,21 @@ class StationStatus(str, Enum):
     MAINTENANCE = "MAINTENANCE"
     OFFLINE = "OFFLINE"
     DISABLED = "DISABLED"
+
+
+class BillingMode(str, Enum):
+    PREPAID = "PREPAID"
+    POSTPAID = "POSTPAID"
+    FREE_PLAY = "FREE_PLAY"
+
+
+class SessionStatus(str, Enum):
+    ACTIVE = "ACTIVE"
+    ENDED = "ENDED"
+
+
+class PaymentMethod(str, Enum):
+    CASH = "CASH"
+    UPI = "UPI"
+    CARD = "CARD"
+    FREE = "FREE"

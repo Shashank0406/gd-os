@@ -13,6 +13,8 @@ Evidence for the current milestone only. A passing health check is not productio
 | Prices stored and returned in rupees | Passed on the Mac, 22 Nov 2026. Live `/pricing` returned `150.00`, `250.00`, and `800.00`. Existing rows were converted by migration `0002_prices_in_rupees`. | `backend/tests/test_catalog.py` and `GET /pricing` |
 | Staff login, hashed passwords, cashier price block, admin price audit, manager staff block, rate limit, placeholder JWT secret | Passed on the Mac, 22 Nov 2026. `pytest`: 16 passed. | `backend/tests/test_auth.py` |
 | Customer register, login, duplicate mobile, cashier walk-in search, customer and staff tokens stay separate | Passed on the Mac, 22 Nov 2026. `pytest`: 20 passed. | `backend/tests/test_customers.py` |
+| Billing rounding, price snapshot, double start, cashier station, package overtime, prepaid extension, free play, one customer per session, API minimum charge | Passed on the Mac, 22 Nov 2026. `pytest`: 34 passed. | `backend/tests/test_billing.py`, `backend/tests/test_sessions.py` |
+| Live API postpaid start and immediate end on PC-15 | Passed on the Mac, 22 Nov 2026. Saved rate `150.00`, local offset `+05:30`, final and paid `2.50`. | Docker API on `http://localhost:8000` |
 
 ## Not run
 

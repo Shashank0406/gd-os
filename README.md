@@ -23,8 +23,9 @@ Working now:
 - Prices stored in rupees (`150.00`) and read back from the database
 - Staff login with Argon2id passwords, roles, and an audit log
 - Customer registration and username login, plus cashier walk-in registration
+- Session start, extension, and end, with rupee charges calculated on the server
 
-Not built yet: session billing, cashier UI, Windows agent.
+Not built yet: cashier UI, Windows agent.
 
 ## Run the health check on this Mac
 

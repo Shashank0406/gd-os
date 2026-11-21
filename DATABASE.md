@@ -10,6 +10,7 @@ Migrations:
 - `0002_prices_in_rupees` stores amounts as rupees.
 - `0003_staff_auth` adds roles, permissions, users, and audit logs.
 - `0004_customers` adds customer accounts. Login is username and password. Mobile is stored for cashier lookup.
+- `0005_sessions` adds sessions, extensions, and payments. Active sessions are unique per station and per customer.
 
 Tables in this migration:
 
@@ -34,4 +35,4 @@ PS5 packages: 1 hour ₹250, 2 hours ₹450, 3 hours ₹600. The seeded billing 
 
 Staff roles are `SUPER_ADMIN`, `MANAGER`, and `CASHIER`. A user has one role. Permissions are rows, so a manager can read staff and audit records without changing prices.
 
-Still to add: sessions, payments, receipts, maintenance, and agent tables. Session timestamps will be `timestamptz` in UTC.
+Still to add: reservations, receipts, maintenance actions, and agent tables. Session timestamps are `timestamptz` in UTC.

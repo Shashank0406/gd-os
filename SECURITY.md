@@ -1,6 +1,8 @@
 # Security
 
-There are still no accounts. `GET /stations` and `GET /pricing` are open on the LAN until staff login exists. They cannot change a price.
+Staff passwords are hashed with Argon2id. Login returns a bearer token. `GET /stations`, `GET /pricing`, price changes, staff creation, and the audit list require that token and a permission.
+
+The super admin account is created only when `GD_OS_ADMIN_PASSWORD` is at least 8 characters and is not `change-me`. `JWT_SECRET` must also be replaced. Login is limited to 5 failures per address in 5 minutes, in this server process.
 
 The notes below are the rules for the work that follows.
 

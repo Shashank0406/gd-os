@@ -2,7 +2,13 @@
 
 PostgreSQL 16 is the system of record. It runs in Docker on the development Mac and on the café Windows server. The data directory is the named volume `gd_os_pgdata`, which survives a container restart.
 
-Migration `0001_stations_and_pricing` creates the catalog tables. The API container runs `alembic upgrade head` and the seed on startup.
+The API container runs `alembic upgrade head` and the seed on startup.
+
+Migrations:
+
+- `0001_stations_and_pricing` creates the catalog tables.
+- `0002_prices_in_rupees` stores amounts as rupees.
+- `0003_staff_auth` adds roles, permissions, users, and audit logs.
 
 Tables in this migration:
 
@@ -25,4 +31,6 @@ PS5 packages: 1 hour ₹250, 2 hours ₹450, 3 hours ₹600. The seeded billing 
 
 `CASHIER-01` fails a database check if it is marked billable or as a customer station. A pricing plan cannot use the admin workstation device type. Each device type has one active default plan. A station may have one override plan.
 
-Still to add: users, customers, sessions, payments, receipts, maintenance, audit, and agent tables. Session timestamps will be `timestamptz` in UTC.
+Staff roles are `SUPER_ADMIN`, `MANAGER`, and `CASHIER`. A user has one role. Permissions are rows, so a manager can read staff and audit records without changing prices.
+
+Still to add: customers, sessions, payments, receipts, maintenance, and agent tables. Session timestamps will be `timestamptz` in UTC.

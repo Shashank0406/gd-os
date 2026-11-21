@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.0 — Staff login and permissions
+
+- Staff sign in with a username and an Argon2id password hash.
+- Super admin, manager, and cashier roles are stored as permissions.
+- Cashiers can read stations and prices. They cannot change a price or create staff.
+- Price edits record the old and new rupee amounts and an audit row.
+- Login failures are rate-limited, and the placeholder `JWT_SECRET` cannot issue a token.
+
 ## 0.2.1 — Prices stored in rupees
 
 - Hourly rates and package prices are rupees with two decimal places. ₹150 is `150.00`.

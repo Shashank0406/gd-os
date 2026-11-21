@@ -1,16 +1,14 @@
 from decimal import Decimal
 
 import pytest
-from fastapi.testclient import TestClient
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 
 from app.db.seed import seed
-from app.main import app
 from app.models.enums import DeviceType, StationStatus
 from app.models.pricing import Package, PriceChangeLog, PricingPlan, PricingSchedule
 from app.models.station import Station
-from app.db.session import get_db
+from tests.staff_client import staff_client
 
 
 def test_seed_creates_the_cafe_catalog(db) -> None:
@@ -129,14 +127,8 @@ def test_pricing_endpoint_reads_the_database(db) -> None:
     plan.hourly_rate_rupees = Decimal("275.00")
     db.commit()
 
-    def override_db():
-        yield db
-
-    app.dependency_overrides[get_db] = override_db
-    try:
-        response = TestClient(app).get("/pricing")
-    finally:
-        app.dependency_overrides.clear()
+    with staff_client(db, "CASHIER", "cashier-read") as client:
+        response = client.get("/pricing")
 
     assert response.status_code == 200
     body = response.json()
@@ -149,14 +141,8 @@ def test_pricing_endpoint_reads_the_database(db) -> None:
 def test_station_list_marks_cashier_separately(db) -> None:
     seed(db)
 
-    def override_db():
-        yield db
-
-    app.dependency_overrides[get_db] = override_db
-    try:
-        response = TestClient(app).get("/stations")
-    finally:
-        app.dependency_overrides.clear()
+    with staff_client(db, "CASHIER", "cashier-stations") as client:
+        response = client.get("/stations")
 
     assert response.status_code == 200
     stations = response.json()

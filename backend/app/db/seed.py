@@ -12,6 +12,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.models.enums import DeviceType, StationStatus
+from app.services.access import ensure_access
 from app.models.pricing import Package, PriceChangeLog, PricingPlan
 from app.models.station import Station
 from app.schemas.money import rupees, rupees_text
@@ -56,6 +57,7 @@ def seed(session: Session) -> SeedResult:
     stations_inserted = _seed_stations(session)
     plans_inserted = _seed_plans(session)
     packages_inserted = _seed_packages(session)
+    ensure_access(session)
     session.commit()
     return SeedResult(stations_inserted, plans_inserted, packages_inserted)
 

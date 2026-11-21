@@ -1,4 +1,8 @@
 import os
+
+os.environ["JWT_SECRET"] = "test-only-jwt-secret-0123456789abcdef"
+os.environ["GD_OS_ADMIN_PASSWORD"] = "change-me"
+
 from collections.abc import Generator
 from pathlib import Path
 
@@ -33,6 +37,15 @@ def _test_database_url() -> str:
     if url.host in {None, "postgres"}:
         url = url.set(host="localhost")
     return url.set(database="gdos_test").render_as_string(hide_password=False)
+
+
+@pytest.fixture(autouse=True)
+def _clear_login_limiter() -> Generator[None, None, None]:
+    from app.core.login_limit import login_limiter
+
+    login_limiter.clear()
+    yield
+    login_limiter.clear()
 
 
 @pytest.fixture(scope="session")

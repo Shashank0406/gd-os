@@ -27,12 +27,28 @@ Checks that PostgreSQL accepts a query.
 {"status": "ok", "database": "connected"}
 ```
 
+## POST /auth/login
+
+Staff username and password. Returns a bearer token. The password is checked with Argon2id. Unknown users and wrong passwords return the same `401` message. After 5 failures from the same address within 5 minutes, the route returns `429`.
+
+`JWT_SECRET` must be set to a value other than `change-me`. A shift token lasts 12 hours.
+
 ## GET /stations
 
-Returns the 21 seeded stations. `CASHIER-01` has `is_billable: false` and `is_customer_station: false`.
+Requires a staff token with `stations.read`. Returns the 21 seeded stations. `CASHIER-01` has `is_billable: false` and `is_customer_station: false`.
 
 ## GET /pricing
 
-Returns hourly plans and packages from the database. `hourly_rate_rupees` and `price_rupees` are rupee strings with two decimal places, such as `"150.00"`.
+Requires `pricing.read`. `hourly_rate_rupees` and `price_rupees` are rupee strings with two decimal places, such as `"150.00"`.
 
-These two routes do not require a staff login yet. Staff authentication is the next milestone. Do not expose the server beyond the café LAN.
+## PATCH /pricing/plans/{id}
+
+Requires `pricing.write`. Body: `{"hourly_rate_rupees": "180.00"}`. The previous and new rupee amounts are stored in `price_change_log` and `audit_logs`. A cashier token receives `403`.
+
+## POST /staff
+
+Requires `staff.write`, which only the super admin role has. Creates a manager or cashier. Only a super admin can create another super admin. The response does not include the password.
+
+## GET /audit
+
+Requires `audit.read`. Super admins and managers can read it. Cashiers cannot.

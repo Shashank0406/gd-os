@@ -12,13 +12,13 @@ Tables in this migration:
 - `pricing_schedules` (empty until an admin adds peak, off-peak, weekday, or weekend rates)
 - `price_change_log`
 
-Seeded once, and not overwritten if you run the seed again:
+Amounts are `numeric(12,2)` rupees. Seeded once, and not overwritten if you run the seed again:
 
 | Code | Type | Billable | Default hourly rate |
 |---|---|---|---|
-| PC-01 … PC-15 | PC | yes | ₹150 (`15000` paise) |
-| PS5-01 … PS5-03 | PS5 | yes | ₹250 (`25000` paise) |
-| SIM-01, SIM-02 | Racing simulator | yes | ₹800 (`80000` paise) |
+| PC-01 … PC-15 | PC | yes | ₹150.00 |
+| PS5-01 … PS5-03 | PS5 | yes | ₹250.00 |
+| SIM-01, SIM-02 | Racing simulator | yes | ₹800.00 |
 | CASHIER-01 | Admin workstation | no | none |
 
 PS5 packages: 1 hour ₹250, 2 hours ₹450, 3 hours ₹600. The seeded billing increment and minimum duration are 60 seconds. Those are rows, so a later admin screen can change them.

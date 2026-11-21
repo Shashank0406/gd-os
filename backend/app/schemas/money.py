@@ -1,5 +1,13 @@
-def format_inr(paise: int) -> str:
-    """Format integer paise as a rupee string. 15000 becomes 150.00."""
-    sign = "-" if paise < 0 else ""
-    amount = abs(paise)
-    return f"{sign}{amount // 100}.{amount % 100:02d}"
+"""Rupee amounts use two decimal places and decimal arithmetic, never binary floats."""
+
+from decimal import Decimal, ROUND_HALF_UP
+
+RUPEE = Decimal("0.01")
+
+
+def rupees(value: Decimal | int | str) -> Decimal:
+    return Decimal(value).quantize(RUPEE, rounding=ROUND_HALF_UP)
+
+
+def rupees_text(value: Decimal) -> str:
+    return f"{rupees(value):.2f}"

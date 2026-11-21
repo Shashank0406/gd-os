@@ -1,10 +1,15 @@
 # Changelog
 
+## 0.2.1 — Prices stored in rupees
+
+- Hourly rates and package prices are rupees with two decimal places. ₹150 is `150.00`.
+- Existing paise amounts are divided by 100 during migration `0002_prices_in_rupees`.
+
 ## 0.2.0 — Station and price catalog
 
 - Added the PostgreSQL catalog: stations, hourly plans, packages, optional schedules, and a price change log.
 - Seeded PC-01–PC-15, PS5-01–PS5-03, SIM-01, SIM-02, and CASHIER-01.
-- Stored default rates as paise. A second seed does not overwrite an edited rate.
+- Stored default rates in the price tables. A second seed does not overwrite an edited rate.
 - The database rejects a billable cashier station and a second active default plan for the same device type.
 
 ## 0.1.0 — Day 1 foundation

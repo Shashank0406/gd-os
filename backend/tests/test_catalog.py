@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import func, select
@@ -37,21 +39,25 @@ def test_seed_creates_the_cafe_catalog(db) -> None:
     assert cashier.status == StationStatus.AVAILABLE
 
     rates = {
-        plan.device_type: plan.hourly_rate_paise
+        plan.device_type: plan.hourly_rate_rupees
         for plan in db.scalars(select(PricingPlan).where(PricingPlan.station_id.is_(None)))
     }
     assert rates == {
-        DeviceType.PC: 15000,
-        DeviceType.PS5: 25000,
-        DeviceType.RACING_SIMULATOR: 80000,
+        DeviceType.PC: Decimal("150.00"),
+        DeviceType.PS5: Decimal("250.00"),
+        DeviceType.RACING_SIMULATOR: Decimal("800.00"),
     }
     assert db.scalar(select(func.count()).select_from(PricingPlan).where(PricingPlan.device_type == DeviceType.ADMIN_WORKSTATION)) == 0
 
     packages = {
-        package.code: package.price_paise
+        package.code: package.price_rupees
         for package in db.scalars(select(Package))
     }
-    assert packages == {"PS5-1H": 25000, "PS5-2H": 45000, "PS5-3H": 60000}
+    assert packages == {
+        "PS5-1H": Decimal("250.00"),
+        "PS5-2H": Decimal("450.00"),
+        "PS5-3H": Decimal("600.00"),
+    }
     assert db.scalar(select(func.count()).select_from(PricingSchedule)) == 0
     assert db.scalar(select(func.count()).select_from(PriceChangeLog)) == 6
 
@@ -65,7 +71,7 @@ def test_seed_again_does_not_change_an_edited_price(db) -> None:
         )
     )
     assert plan is not None
-    plan.hourly_rate_paise = 18000
+    plan.hourly_rate_rupees = Decimal("180.00")
     db.commit()
 
     second = seed(db)
@@ -74,7 +80,7 @@ def test_seed_again_does_not_change_an_edited_price(db) -> None:
     assert second.plans_inserted == 0
     assert second.packages_inserted == 0
     db.refresh(plan)
-    assert plan.hourly_rate_paise == 18000
+    assert plan.hourly_rate_rupees == Decimal("180.00")
 
 
 def test_admin_workstation_cannot_be_billable(db) -> None:
@@ -100,7 +106,7 @@ def test_only_one_active_default_plan_per_device(db) -> None:
             name="Second PC default",
             device_type=DeviceType.PC,
             station_id=None,
-            hourly_rate_paise=16000,
+            hourly_rate_rupees=Decimal("160.00"),
             billing_increment_seconds=60,
             minimum_duration_seconds=60,
             is_active=True,
@@ -120,7 +126,7 @@ def test_pricing_endpoint_reads_the_database(db) -> None:
         )
     )
     assert plan is not None
-    plan.hourly_rate_paise = 27500
+    plan.hourly_rate_rupees = Decimal("275.00")
     db.commit()
 
     def override_db():
@@ -135,8 +141,8 @@ def test_pricing_endpoint_reads_the_database(db) -> None:
     assert response.status_code == 200
     body = response.json()
     ps5 = next(item for item in body["plans"] if item["device_type"] == "PS5" and item["station_id"] is None)
-    assert ps5["hourly_rate_paise"] == 27500
-    assert ps5["hourly_rate_inr"] == "275.00"
+    assert ps5["hourly_rate_rupees"] == "275.00"
+    assert "hourly_rate_paise" not in ps5
     assert body["schedule_count"] == 0
 
 

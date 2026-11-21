@@ -1,5 +1,6 @@
 import uuid
 from datetime import datetime, time
+from decimal import Decimal
 
 from sqlalchemy import (
     Boolean,
@@ -9,6 +10,7 @@ from sqlalchemy import (
     ForeignKey,
     Index,
     Integer,
+    Numeric,
     String,
     Time,
     Uuid,
@@ -26,7 +28,7 @@ class PricingPlan(Base):
 
     __tablename__ = "pricing_plans"
     __table_args__ = (
-        CheckConstraint("hourly_rate_paise >= 0", name="ck_pricing_plans_rate_nonnegative"),
+        CheckConstraint("hourly_rate_rupees >= 0", name="ck_pricing_plans_rate_nonnegative"),
         CheckConstraint(
             "billing_increment_seconds > 0",
             name="ck_pricing_plans_increment_positive",
@@ -60,7 +62,7 @@ class PricingPlan(Base):
         nullable=False,
     )
     station_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("stations.id"))
-    hourly_rate_paise: Mapped[int] = mapped_column(Integer, nullable=False)
+    hourly_rate_rupees: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
     billing_increment_seconds: Mapped[int] = mapped_column(Integer, nullable=False)
     minimum_duration_seconds: Mapped[int] = mapped_column(Integer, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default=text("true"))
@@ -80,7 +82,7 @@ class PricingPlan(Base):
 class Package(Base):
     __tablename__ = "packages"
     __table_args__ = (
-        CheckConstraint("price_paise >= 0", name="ck_packages_price_nonnegative"),
+        CheckConstraint("price_rupees >= 0", name="ck_packages_price_nonnegative"),
         CheckConstraint("duration_seconds > 0", name="ck_packages_duration_positive"),
         CheckConstraint("device_type <> 'ADMIN_WORKSTATION'", name="ck_packages_not_admin"),
     )
@@ -93,7 +95,7 @@ class Package(Base):
         nullable=False,
     )
     duration_seconds: Mapped[int] = mapped_column(Integer, nullable=False)
-    price_paise: Mapped[int] = mapped_column(Integer, nullable=False)
+    price_rupees: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default=text("true"))
     sort_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
     created_at: Mapped[datetime] = mapped_column(
@@ -114,7 +116,7 @@ class PricingSchedule(Base):
 
     __tablename__ = "pricing_schedules"
     __table_args__ = (
-        CheckConstraint("hourly_rate_paise >= 0", name="ck_pricing_schedules_rate_nonnegative"),
+        CheckConstraint("hourly_rate_rupees >= 0", name="ck_pricing_schedules_rate_nonnegative"),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
@@ -123,7 +125,7 @@ class PricingSchedule(Base):
     days_of_week: Mapped[str] = mapped_column(String(32), nullable=False)
     start_local_time: Mapped[time] = mapped_column(Time, nullable=False)
     end_local_time: Mapped[time] = mapped_column(Time, nullable=False)
-    hourly_rate_paise: Mapped[int] = mapped_column(Integer, nullable=False)
+    hourly_rate_rupees: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default=text("true"))
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),

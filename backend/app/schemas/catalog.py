@@ -1,9 +1,10 @@
 import uuid
+from decimal import Decimal
 
-from pydantic import BaseModel, ConfigDict, computed_field
+from pydantic import BaseModel, ConfigDict, field_serializer
 
 from app.models.enums import DeviceType, StationStatus
-from app.schemas.money import format_inr
+from app.schemas.money import rupees_text
 
 
 class StationOut(BaseModel):
@@ -26,15 +27,14 @@ class PricingPlanOut(BaseModel):
     name: str
     device_type: DeviceType
     station_id: uuid.UUID | None
-    hourly_rate_paise: int
+    hourly_rate_rupees: Decimal
     billing_increment_seconds: int
     minimum_duration_seconds: int
     is_active: bool
 
-    @computed_field
-    @property
-    def hourly_rate_inr(self) -> str:
-        return format_inr(self.hourly_rate_paise)
+    @field_serializer("hourly_rate_rupees")
+    def serialize_hourly_rate(self, value: Decimal) -> str:
+        return rupees_text(value)
 
 
 class PackageOut(BaseModel):
@@ -45,14 +45,13 @@ class PackageOut(BaseModel):
     name: str
     device_type: DeviceType
     duration_seconds: int
-    price_paise: int
+    price_rupees: Decimal
     is_active: bool
     sort_order: int
 
-    @computed_field
-    @property
-    def price_inr(self) -> str:
-        return format_inr(self.price_paise)
+    @field_serializer("price_rupees")
+    def serialize_price(self, value: Decimal) -> str:
+        return rupees_text(value)
 
 
 class CatalogOut(BaseModel):

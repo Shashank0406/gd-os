@@ -33,6 +33,6 @@ Returns the 21 seeded stations. `CASHIER-01` has `is_billable: false` and `is_cu
 
 ## GET /pricing
 
-Returns hourly plans and packages from the database. Money is `hourly_rate_paise` or `price_paise`, plus a display string such as `"150.00"`. The display string is derived from paise.
+Returns hourly plans and packages from the database. `hourly_rate_rupees` and `price_rupees` are rupee strings with two decimal places, such as `"150.00"`.
 
 These two routes do not require a staff login yet. Staff authentication is the next milestone. Do not expose the server beyond the café LAN.

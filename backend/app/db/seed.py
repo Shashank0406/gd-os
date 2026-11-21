@@ -6,6 +6,7 @@ and leaves existing prices unchanged.
 """
 
 from dataclasses import dataclass
+from decimal import Decimal
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -13,6 +14,7 @@ from sqlalchemy.orm import Session
 from app.models.enums import DeviceType, StationStatus
 from app.models.pricing import Package, PriceChangeLog, PricingPlan
 from app.models.station import Station
+from app.schemas.money import rupees, rupees_text
 
 SEED_ACTOR = "system-seed"
 DEFAULT_INCREMENT_SECONDS = 60
@@ -30,18 +32,16 @@ STATIONS: tuple[tuple[str, str, DeviceType, bool, bool], ...] = tuple(
     ]
 )
 
-# hourly_rate_paise: ₹150, ₹250, and ₹800.
-DEFAULT_PLANS: tuple[tuple[str, DeviceType, int], ...] = (
-    ("Gaming PC default", DeviceType.PC, 15000),
-    ("PS5 default", DeviceType.PS5, 25000),
-    ("Racing simulator default", DeviceType.RACING_SIMULATOR, 80000),
+DEFAULT_PLANS: tuple[tuple[str, DeviceType, Decimal], ...] = (
+    ("Gaming PC default", DeviceType.PC, rupees("150")),
+    ("PS5 default", DeviceType.PS5, rupees("250")),
+    ("Racing simulator default", DeviceType.RACING_SIMULATOR, rupees("800")),
 )
 
-# price_paise: ₹250, ₹450, and ₹600.
-PACKAGES: tuple[tuple[str, str, DeviceType, int, int, int], ...] = (
-    ("PS5-1H", "PS5 1 hour", DeviceType.PS5, 3600, 25000, 1),
-    ("PS5-2H", "PS5 2 hours", DeviceType.PS5, 7200, 45000, 2),
-    ("PS5-3H", "PS5 3 hours", DeviceType.PS5, 10800, 60000, 3),
+PACKAGES: tuple[tuple[str, str, DeviceType, int, Decimal, int], ...] = (
+    ("PS5-1H", "PS5 1 hour", DeviceType.PS5, 3600, rupees("250"), 1),
+    ("PS5-2H", "PS5 2 hours", DeviceType.PS5, 7200, rupees("450"), 2),
+    ("PS5-3H", "PS5 3 hours", DeviceType.PS5, 10800, rupees("600"), 3),
 )
 
 
@@ -83,7 +83,7 @@ def _seed_stations(session: Session) -> int:
 
 def _seed_plans(session: Session) -> int:
     inserted = 0
-    for name, device_type, hourly_rate_paise in DEFAULT_PLANS:
+    for name, device_type, hourly_rate_rupees in DEFAULT_PLANS:
         exists = session.scalar(
             select(PricingPlan.id).where(
                 PricingPlan.device_type == device_type,
@@ -96,21 +96,21 @@ def _seed_plans(session: Session) -> int:
             name=name,
             device_type=device_type,
             station_id=None,
-            hourly_rate_paise=hourly_rate_paise,
+            hourly_rate_rupees=hourly_rate_rupees,
             billing_increment_seconds=DEFAULT_INCREMENT_SECONDS,
             minimum_duration_seconds=DEFAULT_MINIMUM_SECONDS,
             is_active=True,
         )
         session.add(plan)
         session.flush()
-        _log_initial_price(session, "pricing_plan", plan.id, "hourly_rate_paise", hourly_rate_paise)
+        _log_initial_price(session, "pricing_plan", plan.id, "hourly_rate_rupees", hourly_rate_rupees)
         inserted += 1
     return inserted
 
 
 def _seed_packages(session: Session) -> int:
     inserted = 0
-    for code, name, device_type, duration_seconds, price_paise, sort_order in PACKAGES:
+    for code, name, device_type, duration_seconds, price_rupees, sort_order in PACKAGES:
         exists = session.scalar(select(Package.id).where(Package.code == code))
         if exists is not None:
             continue
@@ -119,25 +119,25 @@ def _seed_packages(session: Session) -> int:
             name=name,
             device_type=device_type,
             duration_seconds=duration_seconds,
-            price_paise=price_paise,
+            price_rupees=price_rupees,
             is_active=True,
             sort_order=sort_order,
         )
         session.add(package)
         session.flush()
-        _log_initial_price(session, "package", package.id, "price_paise", price_paise)
+        _log_initial_price(session, "package", package.id, "price_rupees", price_rupees)
         inserted += 1
     return inserted
 
 
-def _log_initial_price(session: Session, entity_type: str, entity_id, field_name: str, value: int) -> None:
+def _log_initial_price(session: Session, entity_type: str, entity_id, field_name: str, value: Decimal) -> None:
     session.add(
         PriceChangeLog(
             entity_type=entity_type,
             entity_id=entity_id,
             field_name=field_name,
             old_value=None,
-            new_value=str(value),
+            new_value=rupees_text(value),
             actor_label=SEED_ACTOR,
             note="initial catalog",
         )

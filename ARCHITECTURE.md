@@ -27,14 +27,13 @@ PS5 consoles and racing simulators have no agent. Staff start and end those sess
 
 ## Money and time
 
-Money is stored as integer paise. ₹150 is `15000`. The catalog tables and seed are in place. Session snapshots and the charge calculation are not built yet.
+Money is stored in rupees with two decimal places (`numeric(12,2)`). ₹150 is `150.00`. Decimal arithmetic is used so amounts are not binary floats. The catalog tables and seed are in place. Session snapshots and the charge calculation are not built yet.
 
-- Money is integer paise. ₹150 is `15000`.
 - Session start copies the active price into an immutable snapshot.
 - A price edit affects new sessions only.
 - `started_at` and `ended_at` come from the server clock in UTC.
 - Screens show Asia/Kolkata.
-- Postpaid amount is computed once at the end: round elapsed time up to the billing increment, apply the minimum duration, then `(hourly_rate_paise * billable_seconds + 1800) // 3600`.
+- Postpaid amount is computed once at the end: round elapsed time up to the billing increment, apply the minimum duration, then round half-up to `0.01` rupee.
 
 ## Station rule
 

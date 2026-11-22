@@ -36,4 +36,6 @@ PS5 packages: 1 hour ₹250, 2 hours ₹450, 3 hours ₹600. The seeded billing 
 
 Staff roles are `SUPER_ADMIN`, `MANAGER`, and `CASHIER`. A user has one role. Permissions are rows, so a manager can read staff and audit records without changing prices.
 
-Still to add: reservations, receipts, and maintenance actions. Session timestamps are `timestamptz` in UTC.
+Takings are not a separate table. They are the `payments` rows for one Asia/Kolkata calendar day. Session timestamps are `timestamptz` in UTC.
+
+Still to add: reservations, receipts, and maintenance actions.

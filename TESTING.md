@@ -20,6 +20,8 @@ Evidence for the current milestone only. A passing health check is not productio
 | Cashier screen: sign in, postpaid start, extend, end and take ₹2.50; prepaid hour shows due now ₹150.00 and early end keeps the paid amount | Passed on the Mac, 22 Nov 2026, in the browser at `http://localhost:8000`. `CASHIER-01` stays disabled. | Cashier screen served by the API |
 | Agent pairing, heartbeat lock, unlock only during a session, cashier blocked from pairing, mismatched MAC and hardware id | Passed on the Mac, 22 Nov 2026. `pytest`: 39 passed. | `backend/tests/test_agent.py` |
 | Cashier floor and Mac simulator for PC-01: No agent, then Lock, Unlock while a session is open, Lock again after payment | Passed on the Mac, 22 Nov 2026. The simulator printed `PC-01 LOCK`, then `PC-01 UNLOCK`, then `PC-01 LOCK`. This does not lock a Windows PC. | `http://localhost:8000` and `agent/simulator.py` |
+| Takings follow the Kolkata midnight, split cash and UPI, and reject a customer token | Passed on the Mac, 22 Nov 2026. `pytest`: 41 passed. | `backend/tests/test_reports.py` |
+| Cashier floor today total rises when a session is paid | Passed on the Mac, 22 Nov 2026. The floor moved from `Today ₹157.50` to `Today ₹160.00` after a ₹2.50 cash payment on PC-03. | `http://localhost:8000` |
 
 ## Not run
 

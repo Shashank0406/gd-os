@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.8.0 — Daily takings
+
+- Payments are totaled for the Asia/Kolkata calendar day.
+- Cash, UPI, card, and free play are listed separately.
+- The cashier floor shows today's total. A customer token cannot read it.
+
 ## 0.7.0 — PC agent protocol
 
 - A manager pairs a gaming PC by MAC address and hardware id. The mapping stays on the server.

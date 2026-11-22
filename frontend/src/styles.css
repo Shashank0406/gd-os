@@ -121,6 +121,12 @@ p {
   font-size: 0.75rem;
 }
 
+.takings {
+  margin-top: 0.35rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
 .group {
   margin-top: 1rem;
 }

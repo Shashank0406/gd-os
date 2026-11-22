@@ -34,6 +34,7 @@ Money is stored in rupees with two decimal places (`numeric(12,2)`). ₹150 is `
 - Screens show Asia/Kolkata.
 - Postpaid amount is computed once at the end: round elapsed time up to the billing increment, apply the minimum duration, then round half-up to `0.01` rupee.
 - A prepaid package is charged at its saved price. Ending early does not refund it. Time beyond the package is charged from the saved hourly rate.
+- Daily takings sum the payments recorded on the Asia/Kolkata calendar day.
 
 ## Station rule
 

@@ -81,6 +81,10 @@ Requires `stations.manage`. A manager pairs a gaming PC. PS5s, simulators, and `
 
 No staff token. The body is the PC's MAC address and hardware id. The response is `LOCK` or `UNLOCK`. `UNLOCK` means that station has an active session. A PC cannot send the amount to charge or the action it wants.
 
+## GET /reports/takings
+
+Requires `sessions.read`. Optional `date` is `YYYY-MM-DD`. When it is omitted, the date is today in Asia/Kolkata. The total is the sum of payments recorded on that local day. A payment just before midnight stays on that day, and one at midnight belongs to the next day.
+
 ## GET /stations
 
 Requires a staff token with `stations.read`. Returns the 21 seeded stations. `CASHIER-01` has `is_billable: false` and `is_customer_station: false`.

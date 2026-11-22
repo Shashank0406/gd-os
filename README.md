@@ -26,6 +26,7 @@ Working now:
 - Session start, extension, and end, with rupee charges calculated on the server
 - Cashier screen for the floor, session start, extension, and payment at the end
 - PC pairing and a heartbeat that returns lock or unlock from the server
+- Daily takings in rupees, using the Asia/Kolkata day, on the cashier floor
 
 Not built yet: the Windows service that would actually lock a PC.
 

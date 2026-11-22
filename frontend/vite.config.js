@@ -11,6 +11,7 @@ export default defineConfig({
       "/sessions": "http://localhost:8000",
       "/customers": "http://localhost:8000",
       "/pricing": "http://localhost:8000",
+      "/reports": "http://localhost:8000",
       "/health": "http://localhost:8000",
       "/ready": "http://localhost:8000",
     },

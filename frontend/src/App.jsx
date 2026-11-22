@@ -101,17 +101,20 @@ function Desk({ token, staffName, onSignOut, onUnauthorized }) {
   const [selectedCode, setSelectedCode] = useState("")
   const [error, setError] = useState("")
   const [notice, setNotice] = useState("")
+  const [takings, setTakings] = useState(null)
 
   async function reload() {
     try {
-      const [nextStations, nextSessions, nextPricing] = await Promise.all([
+      const [nextStations, nextSessions, nextPricing, nextTakings] = await Promise.all([
         api("/stations", { token }),
         api("/sessions/active", { token }),
         api("/pricing", { token }),
+        api("/reports/takings", { token }),
       ])
       setStations(nextStations)
       setSessions(nextSessions)
       setPricing(nextPricing)
+      setTakings(nextTakings)
       setError("")
     } catch (err) {
       if (err.status === 401) {
@@ -138,6 +141,7 @@ function Desk({ token, staffName, onSignOut, onUnauthorized }) {
           <div>
             <p className="eyebrow">Gamers District</p>
             <h1>Floor</h1>
+            {takings ? <p className="takings">{takingsLine(takings)}</p> : null}
           </div>
           <div>
             <span>{staffName}</span>{" "}
@@ -546,6 +550,11 @@ function MethodPicker({ method, onChange }) {
       ))}
     </div>
   )
+}
+
+function takingsLine(takings) {
+  const amounts = Object.fromEntries(takings.by_method.map((item) => [item.method, item.amount_rupees]))
+  return `Today ₹${takings.total_rupees} · Cash ₹${amounts.CASH} · UPI ₹${amounts.UPI} · Card ₹${amounts.CARD}`
 }
 
 function stationLabel(station) {

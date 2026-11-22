@@ -101,6 +101,7 @@ function Desk({ token, staffName, onSignOut, onUnauthorized }) {
   const [selectedCode, setSelectedCode] = useState("")
   const [error, setError] = useState("")
   const [notice, setNotice] = useState("")
+  const [receipt, setReceipt] = useState(null)
   const [takings, setTakings] = useState(null)
   const [reservations, setReservations] = useState([])
 
@@ -172,6 +173,7 @@ function Desk({ token, staffName, onSignOut, onUnauthorized }) {
                     onClick={() => {
                       setSelectedCode(station.code)
                       setNotice("")
+                      setReceipt(null)
                     }}
                   >
                     <strong>{station.code}</strong>
@@ -193,6 +195,7 @@ function Desk({ token, staffName, onSignOut, onUnauthorized }) {
             onChanged={reload}
             onUnauthorized={onUnauthorized}
             onNotice={setNotice}
+            onReceipt={setReceipt}
           />
         ) : null}
         {selected && selected.is_billable && !active && selected.status === "AVAILABLE" ? (
@@ -209,6 +212,7 @@ function Desk({ token, staffName, onSignOut, onUnauthorized }) {
         {selected && selected.is_billable && !active && selected.status !== "AVAILABLE" ? (
           <p>{selected.code} is {selected.status.replaceAll("_", " ").toLowerCase()}.</p>
         ) : null}
+        {receipt ? <Receipt slip={receipt} /> : null}
         {notice ? <div className="receipt">{notice}</div> : null}
       </section>
     </main>
@@ -493,7 +497,27 @@ function StartPanel({ token, station, pricing, reservations, onStarted, onUnauth
   )
 }
 
-function SessionPanel({ token, session, onChanged, onUnauthorized, onNotice }) {
+function Receipt({ slip }) {
+  return (
+    <div className="receipt">
+      <p className="eyebrow">Receipt</p>
+      <p>
+        {slip.station_code} · {slip.holder_name}
+      </p>
+      <p>
+        {slip.started_at_local.slice(11, 16)}–{slip.ended_at_local.slice(11, 16)} · ₹{slip.hourly_rate_rupees}/hour
+      </p>
+      {slip.payments.map((payment, index) => (
+        <p key={`${payment.method}-${index}`}>
+          {payment.method} ₹{payment.amount_rupees}
+        </p>
+      ))}
+      <p className="money">₹{slip.final_amount_rupees}</p>
+    </div>
+  )
+}
+
+function SessionPanel({ token, session, onChanged, onUnauthorized, onNotice, onReceipt }) {
   const [due, setDue] = useState(null)
   const [extendFor, setExtendFor] = useState(1800)
   const [method, setMethod] = useState("CASH")
@@ -558,12 +582,13 @@ function SessionPanel({ token, session, onChanged, onUnauthorized, onNotice }) {
     setError("")
     try {
       const needsPayment = due && Number(due.balance_rupees) > 0
-      const ended = await api(`/sessions/${session.id}/end`, {
+      await api(`/sessions/${session.id}/end`, {
         method: "POST",
         token,
         body: { payment_method: needsPayment ? method : null },
       })
-      onNotice(`${session.station_code} closed. Bill ₹${ended.final_amount_rupees}. Paid ₹${ended.amount_paid_rupees}.`)
+      const slip = await api(`/sessions/${session.id}/receipt`, { token })
+      onReceipt(slip)
       await onChanged()
     } catch (err) {
       if (err.status === 401) {

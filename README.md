@@ -29,6 +29,7 @@ Working now:
 - Daily takings in rupees, using the Asia/Kolkata day, on the cashier floor
 - Database backup and a confirmed restore that leaves the Docker volume in place
 - Station reservations that cannot overlap, shown on the cashier floor
+- A receipt for each closed session, shown after payment
 
 Not built yet: the Windows service that would actually lock a PC.
 

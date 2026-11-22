@@ -39,4 +39,6 @@ Staff roles are `SUPER_ADMIN`, `MANAGER`, and `CASHIER`. A user has one role. Pe
 
 Takings are not a separate table. They are the `payments` rows for one Asia/Kolkata calendar day. Session timestamps are `timestamptz` in UTC.
 
-Still to add: receipts and maintenance actions.
+A receipt is not a separate table. It is a closed session plus the payments recorded for it.
+
+Still to add: maintenance actions.

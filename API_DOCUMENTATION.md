@@ -61,6 +61,10 @@ Requires `sessions.operate`. Starts a session on an available customer station. 
 
 Requires `sessions.read`. Returns the current bill, the amount already paid, and the balance still to collect. This does not close the session. Times use the server clock. The local time is Asia/Kolkata.
 
+## GET /sessions/{id}/receipt
+
+Requires `sessions.read`. Returns the station, guest or customer, local start and end, hourly rate, each payment, and the final amount. An open session returns 409.
+
 ## POST /sessions/{id}/extend
 
 Adds time. A prepaid extension is charged immediately from the saved hourly rate. A postpaid extension only moves the planned end.

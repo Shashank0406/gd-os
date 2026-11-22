@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.11.0 — Session receipt
+
+- A closed session has a receipt: station, guest, Kolkata times, rate, payments, and the final rupee amount.
+- An open session does not have a receipt. A customer token cannot read one.
+- The cashier screen shows the receipt after the session is closed.
+
 ## 0.10.0 — Station reservations
 
 - A cashier can hold a station for a guest for 30 minutes to 12 hours.

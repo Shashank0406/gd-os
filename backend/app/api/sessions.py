@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import require_permission
 from app.db.session import get_db
+from app.models.customer import Customer
 from app.models.enums import BillingMode, PaymentMethod, SessionStatus
 from app.models.identity import User
 from app.models.play_session import Payment, PlaySession
@@ -38,6 +39,25 @@ class ExtendIn(BaseModel):
 
 class EndIn(BaseModel):
     payment_method: PaymentMethod | None = None
+
+
+class PaymentLine(BaseModel):
+    method: PaymentMethod
+    amount_rupees: str
+
+
+class ReceiptOut(BaseModel):
+    id: str
+    station_code: str
+    holder_name: str
+    billing_mode: BillingMode
+    hourly_rate_rupees: str
+    package_code: str | None
+    started_at_local: str
+    ended_at_local: str
+    final_amount_rupees: str
+    amount_paid_rupees: str
+    payments: list[PaymentLine]
 
 
 class DueOut(BaseModel):
@@ -149,6 +169,37 @@ def due(
         amount_paid_rupees=rupees_text(paid_total),
         balance_rupees=rupees_text(balance),
         as_of_local=_local(moment),
+    )
+
+
+@router.get("/{session_id}/receipt", response_model=ReceiptOut)
+def receipt(
+    session_id: uuid.UUID,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_permission("sessions.read")),
+) -> ReceiptOut:
+    play = db.get(PlaySession, session_id)
+    if play is None:
+        raise HTTPException(status_code=404, detail="Session not found")
+    if play.status != SessionStatus.ENDED or play.ended_at is None or play.final_amount_rupees is None:
+        raise HTTPException(status_code=409, detail="The receipt is available after the session is closed")
+    station = db.get(Station, play.station_id)
+    customer = db.get(Customer, play.customer_id) if play.customer_id else None
+    holder = play.guest_label or ("" if customer is None else customer.display_name)
+    payments = list(db.scalars(select(Payment).where(Payment.session_id == play.id).order_by(Payment.recorded_at, Payment.id)))
+    paid_total = rupees(sum((payment.amount_rupees for payment in payments), 0))
+    return ReceiptOut(
+        id=str(play.id),
+        station_code="" if station is None else station.code,
+        holder_name=holder,
+        billing_mode=play.billing_mode,
+        hourly_rate_rupees=rupees_text(play.hourly_rate_rupees),
+        package_code=play.package_code,
+        started_at_local=_local(play.started_at),
+        ended_at_local=_local(play.ended_at),
+        final_amount_rupees=rupees_text(play.final_amount_rupees),
+        amount_paid_rupees=rupees_text(paid_total),
+        payments=[PaymentLine(method=payment.method, amount_rupees=rupees_text(payment.amount_rupees)) for payment in payments],
     )
 
 

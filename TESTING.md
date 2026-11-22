@@ -29,6 +29,7 @@ Evidence for the current milestone only. A passing health check is not productio
 | Cashier screen shows the receipt after closing PC-13 | Passed on the Mac, 22 Nov 2026. The panel showed Receipt, Receipt check, cash ₹2.50, and the final ₹2.50. PC-13 was free again. | `http://localhost:8000` |
 | Maintenance blocks play and a new reservation, an open session blocks the change, and a cashier is refused | Passed on the Mac, 23 Nov 2026. `pytest`: 49 passed. | `backend/tests/test_maintenance.py` |
 | Manager marks PC-15 as maintenance, then returns it to the floor | Passed on the Mac, 23 Nov 2026. The tile showed MAINTENANCE and "Fan check", the start panel was gone, and Return to floor made PC-15 available again. | `http://localhost:8000` |
+| Windows agent applies unlock only when the server says so, covers on failure, and reads a heartbeat | Passed on the Mac, 23 Nov 2026. `dotnet test`: 5 passed. `gdos-agent.exe` published as a 64-bit Windows program. One live heartbeat printed `PC-01 LOCK`. The Mac run did not cover a desktop. | `agent/windows` |
 
 ## Not run
 

@@ -53,15 +53,16 @@ GD_OS_RESTORE_CONFIRM=yes sh scripts/restore.sh backups/gdos-YYYYMMDDTHHMMSSZ.sq
 
 On the Windows server, run these from WSL in the repository folder. PowerShell redirection can corrupt a SQL dump. A Windows reboot of Docker has still not been tested.
 
-## Windows agent build, later
+## Windows agent
 
-The heartbeat protocol and Mac simulator exist. The Windows service is still unpublished. It will be published from the Mac for a 64-bit Windows PC:
+Publish from a machine with the .NET 8 SDK. The copy of `dotnet` that comes first on this Mac is SDK 7, which cannot build this project.
 
 ```bash
-dotnet publish -c Release -r win-x64 --self-contained
+cd agent/windows
+dotnet publish GdOs.Agent/GdOs.Agent.csproj -c Release -r win-x64 --self-contained -o /tmp/gdos-agent-win
 ```
 
-That step needs the .NET 8 SDK. This Mac currently has .NET SDK 7, which is out of support. The agent project is not created yet, and lock/unlock is not claimed to work.
+That writes `gdos-agent.exe`. It belongs in the player session, started at sign-in. A Windows service cannot cover the desktop the player sees. The published program was built on this Mac. It has not been run on a diskless PC, so the cover is not claimed to work yet.
 
 ## Not verified from this Mac
 

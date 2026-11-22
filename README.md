@@ -10,7 +10,7 @@ Development happens on macOS. The café installation runs on Windows. Docker Com
 |---|---|---|
 | API and PostgreSQL | Docker Desktop | Docker Desktop with WSL2, same `compose.yml` |
 | Admin and cashier UI | Browser on the Mac | Browser on the cashier PC and admin PC |
-| Gaming PC agent | Simulator on the Mac, later | Native Windows service on each diskless PC |
+| Gaming PC agent | Prints the server action. It does not cover this Mac. | `gdos-agent.exe` in the player session on each diskless PC |
 | CCBoot | Not involved | PXE boot, images, write-back. GD OS does not replace it |
 
 ## Current status
@@ -31,8 +31,9 @@ Working now:
 - Station reservations that cannot overlap, shown on the cashier floor
 - A receipt for each closed session, shown after payment
 - Maintenance and disabled stations, which stay out of play until a manager returns them
+- A Windows PC agent that covers the desktop when the server says lock, and hides that cover when a session is active
 
-Not built yet: the Windows service that would actually lock a PC.
+The Windows cover has not been tried on a diskless PC. The Mac build only prints `LOCK` or `UNLOCK`.
 
 ## Run the health check on this Mac
 
@@ -61,7 +62,7 @@ Windows production steps are in [DEPLOYMENT.md](DEPLOYMENT.md).
 ```
 backend/     FastAPI service
 frontend/    Cashier screen
-agent/       Mac simulator for the PC heartbeat. Windows service not started
+agent/       PC heartbeat. Mac simulator, and the Windows agent project
 compose.yml  API + PostgreSQL
 ```
 

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.13.0 — Windows PC agent
+
+- The PC agent asks the server on each heartbeat and applies only `LOCK` or `UNLOCK`.
+- On Windows it covers the player desktop for `LOCK` and hides that cover for `UNLOCK`. A failed heartbeat keeps the cover up.
+- On this Mac it prints the server action and does not cover the desktop. A physical diskless PC has not been tested.
+
 ## 0.12.0 — Station maintenance
 
 - A manager can mark a station as maintenance or disabled, with a reason. A cashier cannot.

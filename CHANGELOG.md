@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.9.0 — Database backup
+
+- `scripts/backup.sh` writes a SQL dump of the café database without stopping the API.
+- `scripts/restore.sh` refuses to replace a database unless `GD_OS_RESTORE_CONFIRM=yes`.
+- Restore does not remove the Docker volume. `docker compose down -v` is still unsafe.
+
 ## 0.8.0 — Daily takings
 
 - Payments are totaled for the Asia/Kolkata calendar day.

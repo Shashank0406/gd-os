@@ -39,7 +39,19 @@ Relative compose paths are valid on both operating systems. Do not introduce `/U
 
 PostgreSQL data lives in the Docker volume `gd_os_pgdata`. Removing the container does not remove that volume. `docker compose down -v` does delete it. Do not use `-v` on the café server.
 
-Backups are not scripted yet. Until they exist, this stack is not ready for live takings.
+Take a backup from the repository folder. The dump is a SQL file under `backups/`, which is not committed.
+
+```bash
+sh scripts/backup.sh
+```
+
+Restoring replaces the target database. It does not delete the Docker volume. The command refuses to run unless the confirmation variable is set. On the café server the target is the live database, so take a fresh backup first.
+
+```bash
+GD_OS_RESTORE_CONFIRM=yes sh scripts/restore.sh backups/gdos-YYYYMMDDTHHMMSSZ.sql
+```
+
+On the Windows server, run these from WSL in the repository folder. PowerShell redirection can corrupt a SQL dump. A Windows reboot of Docker has still not been tested.
 
 ## Windows agent build, later
 

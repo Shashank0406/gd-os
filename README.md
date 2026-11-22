@@ -27,6 +27,7 @@ Working now:
 - Cashier screen for the floor, session start, extension, and payment at the end
 - PC pairing and a heartbeat that returns lock or unlock from the server
 - Daily takings in rupees, using the Asia/Kolkata day, on the cashier floor
+- Database backup and a confirmed restore that leaves the Docker volume in place
 
 Not built yet: the Windows service that would actually lock a PC.
 

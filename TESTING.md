@@ -22,6 +22,7 @@ Evidence for the current milestone only. A passing health check is not productio
 | Cashier floor and Mac simulator for PC-01: No agent, then Lock, Unlock while a session is open, Lock again after payment | Passed on the Mac, 22 Nov 2026. The simulator printed `PC-01 LOCK`, then `PC-01 UNLOCK`, then `PC-01 LOCK`. This does not lock a Windows PC. | `http://localhost:8000` and `agent/simulator.py` |
 | Takings follow the Kolkata midnight, split cash and UPI, and reject a customer token | Passed on the Mac, 22 Nov 2026. `pytest`: 41 passed. | `backend/tests/test_reports.py` |
 | Cashier floor today total rises when a session is paid | Passed on the Mac, 22 Nov 2026. The floor moved from `Today ₹157.50` to `Today ₹160.00` after a ₹2.50 cash payment on PC-03. | `http://localhost:8000` |
+| Backup, refused restore, and restore into a separate database | Passed on the Mac, 22 Nov 2026. The copy had 21 stations and the PC rate `150.00`. The live database was not replaced. | `scripts/test_backup.sh` |
 
 ## Not run
 

@@ -18,3 +18,5 @@ The notes below are the rules for the work that follows.
 - A paired PC is trusted on the café LAN by its MAC address and hardware id. It cannot submit a price or choose unlock. Unlock is returned only while that station has an active session.
 
 The sample database password in `.env.example` is `change-me`. Replace it on any machine that stores real café data.
+
+SQL backups contain customer mobiles and password hashes. They stay in `backups/` on the café machine and are not committed. Restoring a dump replaces the target database only after `GD_OS_RESTORE_CONFIRM=yes`.

@@ -15,6 +15,9 @@ Evidence for the current milestone only. A passing health check is not productio
 | Customer register, login, duplicate mobile, cashier walk-in search, customer and staff tokens stay separate | Passed on the Mac, 22 Nov 2026. `pytest`: 20 passed. | `backend/tests/test_customers.py` |
 | Billing rounding, price snapshot, double start, cashier station, package overtime, prepaid extension, free play, one customer per session, API minimum charge | Passed on the Mac, 22 Nov 2026. `pytest`: 34 passed. | `backend/tests/test_billing.py`, `backend/tests/test_sessions.py` |
 | Live API postpaid start and immediate end on PC-15 | Passed on the Mac, 22 Nov 2026. Saved rate `150.00`, local offset `+05:30`, final and paid `2.50`. | Docker API on `http://localhost:8000` |
+| Amount due before a session ends | Passed on the Mac, 22 Nov 2026. `pytest`: 35 passed. | `backend/tests/test_sessions.py` |
+| Cashier screen money preview | Passed on the Mac, 22 Nov 2026. `npm test`: 4 passed. | `frontend/src/money.test.js` |
+| Cashier screen: sign in, postpaid start, extend, end and take ₹2.50; prepaid hour shows due now ₹150.00 and early end keeps the paid amount | Passed on the Mac, 22 Nov 2026, in the browser at `http://localhost:8000`. `CASHIER-01` stays disabled. | Cashier screen served by the API |
 
 ## Not run
 

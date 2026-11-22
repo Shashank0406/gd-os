@@ -6,7 +6,7 @@ GD OS is developed on a Mac and deployed on a Windows machine on the café LAN.
 
 The server is a Linux container image (`python:3.12-slim` and `postgres:16`), started by Docker Compose. That image is built the same way on macOS and on Windows. Application code uses relative paths, UTC timestamps, and environment variables. It does not call macOS-only APIs.
 
-The cashier and admin interfaces are browser applications. On launch day they open on Windows. During development they open on the Mac against the same API.
+The cashier screen is a browser application served with the API. On launch day it opens on Windows. During development it opens on the Mac against the same API. The admin screens are not built yet.
 
 The gaming-PC agent is a Windows service. It is compiled for `win-x64` and is not part of the Docker stack. A simulator will exercise the agent protocol before any diskless PC is touched.
 

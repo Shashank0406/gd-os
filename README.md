@@ -24,8 +24,9 @@ Working now:
 - Staff login with Argon2id passwords, roles, and an audit log
 - Customer registration and username login, plus cashier walk-in registration
 - Session start, extension, and end, with rupee charges calculated on the server
+- Cashier screen for the floor, session start, extension, and payment at the end
 
-Not built yet: cashier UI, Windows agent.
+Not built yet: Windows agent.
 
 ## Run the health check on this Mac
 
@@ -45,13 +46,15 @@ docker compose up -d --build
 curl http://localhost:8000/health
 ```
 
+The cashier screen is `http://localhost:8000` after the containers are up. Sign in with the staff username from `.env`.
+
 Windows production steps are in [DEPLOYMENT.md](DEPLOYMENT.md).
 
 ## Layout
 
 ```
 backend/     FastAPI service
-frontend/    React app (not started)
+frontend/    Cashier screen
 agent/       Windows agent (not started)
 compose.yml  API + PostgreSQL
 ```

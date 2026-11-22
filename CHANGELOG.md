@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.0 — Cashier screen
+
+- Staff sign in and see the floor. The cashier workstation cannot be billed.
+- A session can be started for a guest, an existing customer, or a new walk-in.
+- The screen shows the amount due from the server before cash, UPI, or card is taken.
+- Prepaid time can be added from the same screen. The API stores the charge.
+
 ## 0.5.0 — Session and billing engine
 
 - One session engine covers PCs, PS5s, and simulators.

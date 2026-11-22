@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -13,8 +13,8 @@ from app.models.enums import BillingMode, PaymentMethod, SessionStatus
 from app.models.identity import User
 from app.models.play_session import Payment, PlaySession
 from app.models.station import Station
-from app.schemas.money import rupees_text
-from app.services.sessions import SessionError, end_session, extend_session, start_session
+from app.schemas.money import rupees, rupees_text
+from app.services.sessions import SessionError, amount_due_at, end_session, extend_session, start_session
 
 router = APIRouter(prefix="/sessions", tags=["sessions"])
 KOLKATA = ZoneInfo("Asia/Kolkata")
@@ -37,6 +37,13 @@ class ExtendIn(BaseModel):
 
 class EndIn(BaseModel):
     payment_method: PaymentMethod | None = None
+
+
+class DueOut(BaseModel):
+    final_amount_rupees: str
+    amount_paid_rupees: str
+    balance_rupees: str
+    as_of_local: str
 
 
 class SessionOut(BaseModel):
@@ -115,6 +122,32 @@ def start(
         ),
     )
     return _out(db, play)
+
+
+@router.get("/{session_id}/due", response_model=DueOut)
+def due(
+    session_id: uuid.UUID,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_permission("sessions.read")),
+) -> DueOut:
+    play = db.get(PlaySession, session_id)
+    if play is None:
+        raise HTTPException(status_code=404, detail="Session not found")
+    if play.status != SessionStatus.ACTIVE:
+        raise HTTPException(status_code=409, detail="Session is already closed")
+    moment = datetime.now(timezone.utc)
+    final_amount = amount_due_at(play, moment)
+    paid = db.scalars(select(Payment.amount_rupees).where(Payment.session_id == play.id))
+    paid_total = rupees(sum(paid, 0))
+    balance = rupees(final_amount - paid_total)
+    if balance < 0:
+        balance = rupees(0)
+    return DueOut(
+        final_amount_rupees=rupees_text(final_amount),
+        amount_paid_rupees=rupees_text(paid_total),
+        balance_rupees=rupees_text(balance),
+        as_of_local=_local(moment),
+    )
 
 
 @router.post("/{session_id}/extend", response_model=SessionOut)

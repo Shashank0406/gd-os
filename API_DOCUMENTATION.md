@@ -57,6 +57,10 @@ Requires `customers.read`. Accepts `9876543210` or `+91 9876543210` and returns 
 
 Requires `sessions.operate`. Starts a session on an available customer station. `CASHIER-01` is rejected. `billing_mode` is `POSTPAID`, `PREPAID`, or `FREE_PLAY`. Prepaid hourly needs `duration_seconds` and a payment method. A package needs `package_code`. The response includes the saved hourly rate and the start time in UTC and Asia/Kolkata.
 
+## GET /sessions/{id}/due
+
+Requires `sessions.read`. Returns the current bill, the amount already paid, and the balance still to collect. This does not close the session. Times use the server clock. The local time is Asia/Kolkata.
+
 ## POST /sessions/{id}/extend
 
 Adds time. A prepaid extension is charged immediately from the saved hourly rate. A postpaid extension only moves the planned end.

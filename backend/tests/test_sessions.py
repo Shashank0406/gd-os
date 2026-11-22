@@ -176,6 +176,22 @@ def test_cashier_can_start_and_end_from_the_api(db) -> None:
     assert ended.json()["amount_paid_rupees"] == "2.50"
 
 
+def test_cashier_can_read_the_amount_due_before_ending(db) -> None:
+    seed(db)
+    with staff_client(db, "CASHIER", "desk-due") as client:
+        started = client.post(
+            "/sessions",
+            json={"station_code": "PC-08", "billing_mode": "POSTPAID", "guest_label": "Due check"},
+        )
+        assert started.status_code == 201, started.text
+        quote = client.get(f"/sessions/{started.json()['id']}/due")
+    assert quote.status_code == 200, quote.text
+    assert quote.json()["final_amount_rupees"] == "2.50"
+    assert quote.json()["amount_paid_rupees"] == "0.00"
+    assert quote.json()["balance_rupees"] == "2.50"
+    assert quote.json()["as_of_local"].endswith("+05:30")
+
+
 def test_customer_cannot_start_a_session(db) -> None:
     seed(db)
 

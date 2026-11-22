@@ -18,6 +18,7 @@ PERMISSIONS: tuple[str, ...] = (
     "customers.write",
     "sessions.read",
     "sessions.operate",
+    "stations.manage",
 )
 
 ROLE_PERMISSIONS: dict[str, tuple[str, ...]] = {
@@ -31,6 +32,7 @@ ROLE_PERMISSIONS: dict[str, tuple[str, ...]] = {
         "customers.write",
         "sessions.read",
         "sessions.operate",
+        "stations.manage",
     ),
     "CASHIER": (
         "stations.read",

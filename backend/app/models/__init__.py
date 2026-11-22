@@ -1,3 +1,4 @@
+from app.models.agent import StationAgent
 from app.models.customer import Customer
 from app.models.identity import AuditLog, Permission, Role, RolePermission, User
 from app.models.pricing import Package, PriceChangeLog, PricingPlan, PricingSchedule
@@ -18,5 +19,6 @@ __all__ = [
     "RolePermission",
     "SessionExtension",
     "Station",
+    "StationAgent",
     "User",
 ]

@@ -73,6 +73,14 @@ Closes the session using the server clock. The final rupee amount uses the price
 
 Requires `sessions.read`. Lists sessions that are still open.
 
+## POST /stations/{code}/agent
+
+Requires `stations.manage`. A manager pairs a gaming PC. PS5s, simulators, and `CASHIER-01` are rejected. The MAC address and hardware id must not already belong to another station.
+
+## POST /agent/heartbeat
+
+No staff token. The body is the PC's MAC address and hardware id. The response is `LOCK` or `UNLOCK`. `UNLOCK` means that station has an active session. A PC cannot send the amount to charge or the action it wants.
+
 ## GET /stations
 
 Requires a staff token with `stations.read`. Returns the 21 seeded stations. `CASHIER-01` has `is_billable: false` and `is_customer_station: false`.

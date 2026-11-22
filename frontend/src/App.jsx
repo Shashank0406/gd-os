@@ -168,7 +168,7 @@ function Desk({ token, staffName, onSignOut, onUnauthorized }) {
                     }}
                   >
                     <strong>{station.code}</strong>
-                    <small>{station.is_billable ? station.status.replaceAll("_", " ") : "Not billed"}</small>
+                    <small>{stationLabel(station)}</small>
                   </button>
                 ))}
               </div>
@@ -546,6 +546,20 @@ function MethodPicker({ method, onChange }) {
       ))}
     </div>
   )
+}
+
+function stationLabel(station) {
+  const status = station.is_billable ? station.status.replaceAll("_", " ") : "Not billed"
+  if (station.agent_desired === "UNPAIRED") {
+    return `${status} · No agent`
+  }
+  if (station.agent_desired === "LOCK") {
+    return `${status} · Lock`
+  }
+  if (station.agent_desired === "UNLOCK") {
+    return `${status} · Unlock`
+  }
+  return status
 }
 
 function planFor(plans, station) {

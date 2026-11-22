@@ -1,9 +1,11 @@
-# GD OS Windows agent
+# GD OS PC agent
 
-Not started. This folder will hold a C# Windows service.
+The server protocol is in place. A gaming PC is paired by MAC address and hardware id. On each heartbeat the server returns `LOCK` or `UNLOCK`. Unlock is returned only while that PC has an active session.
 
-The service runs only on the diskless gaming PCs. It is developed and compiled on the Mac, then published for `win-x64` and copied into the CCBoot Windows image after a one-PC test.
+`simulator.py` sends one heartbeat from this Mac:
 
-The server side will not treat lock or unlock as working until that hardware test is recorded in TESTING.md.
+```bash
+python3 agent/simulator.py --mac aa:bb:cc:dd:ee:01 --hardware 11111111-1111-4111-8111-111111111111
+```
 
-A simulator that speaks the same protocol will be written first and can run on the Mac.
+The simulator does not lock a Windows desktop. The C# Windows service is not created yet. Lock and unlock stay unverified until one physical diskless PC test is recorded in TESTING.md.

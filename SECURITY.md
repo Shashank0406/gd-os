@@ -15,6 +15,6 @@ The notes below are the rules for the work that follows.
 - Login is rate-limited.
 - The café API is for the local network. It is not a public internet service.
 - PostgreSQL must not be exposed beyond the café LAN.
-- Agent unlock commands will be rejected unless they match a server-side session. That protocol is not built yet.
+- A paired PC is trusted on the café LAN by its MAC address and hardware id. It cannot submit a price or choose unlock. Unlock is returned only while that station has an active session.
 
 The sample database password in `.env.example` is `change-me`. Replace it on any machine that stores real café data.

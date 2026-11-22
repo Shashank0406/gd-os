@@ -7,6 +7,7 @@ from fastapi.staticfiles import StaticFiles
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from app.api.agent import router as agent_router
 from app.api.audit import router as audit_router
 from app.api.auth import router as auth_router
 from app.api.customers import router as customers_router
@@ -22,7 +23,7 @@ settings = get_settings()
 app = FastAPI(
     title="GD OS",
     summary="Gamers District Operating System",
-    version="0.6.0",
+    version="0.7.0",
 )
 app.include_router(auth_router)
 app.include_router(customers_router)
@@ -30,6 +31,7 @@ app.include_router(sessions_router)
 app.include_router(staff_router)
 app.include_router(audit_router)
 app.include_router(stations_router)
+app.include_router(agent_router)
 app.include_router(pricing_router)
 
 

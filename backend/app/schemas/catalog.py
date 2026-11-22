@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime
 from decimal import Decimal
 
 from pydantic import BaseModel, ConfigDict, field_serializer
@@ -18,6 +19,8 @@ class StationOut(BaseModel):
     is_customer_station: bool
     is_billable: bool
     maintenance_reason: str | None
+    last_heartbeat_at: datetime | None = None
+    agent_desired: str | None = None
 
 
 class PricingPlanOut(BaseModel):

@@ -18,6 +18,8 @@ Evidence for the current milestone only. A passing health check is not productio
 | Amount due before a session ends | Passed on the Mac, 22 Nov 2026. `pytest`: 35 passed. | `backend/tests/test_sessions.py` |
 | Cashier screen money preview | Passed on the Mac, 22 Nov 2026. `npm test`: 4 passed. | `frontend/src/money.test.js` |
 | Cashier screen: sign in, postpaid start, extend, end and take ₹2.50; prepaid hour shows due now ₹150.00 and early end keeps the paid amount | Passed on the Mac, 22 Nov 2026, in the browser at `http://localhost:8000`. `CASHIER-01` stays disabled. | Cashier screen served by the API |
+| Agent pairing, heartbeat lock, unlock only during a session, cashier blocked from pairing, mismatched MAC and hardware id | Passed on the Mac, 22 Nov 2026. `pytest`: 39 passed. | `backend/tests/test_agent.py` |
+| Cashier floor and Mac simulator for PC-01: No agent, then Lock, Unlock while a session is open, Lock again after payment | Passed on the Mac, 22 Nov 2026. The simulator printed `PC-01 LOCK`, then `PC-01 UNLOCK`, then `PC-01 LOCK`. This does not lock a Windows PC. | `http://localhost:8000` and `agent/simulator.py` |
 
 ## Not run
 
@@ -27,7 +29,6 @@ Evidence for the current milestone only. A passing health check is not productio
 - Server restart recovery
 - Database restore
 - Offline operation
-- Windows agent disconnect and reconnect
 - Physical diskless PC lock/unlock
 - 8–12 hour stability
 

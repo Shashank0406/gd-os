@@ -43,4 +43,4 @@ Money is stored in rupees with two decimal places (`numeric(12,2)`). ₹150 is `
 
 Sessions, payments, stations, and audit logs are the core. Food and beverage can attach a future order to a session id without changing the billing formula.
 
-The Windows agent identifies a diskless PC by MAC and hardware id on every boot, because a shared CCBoot image cannot store a unique secret per PC and write-back is discarded on reboot. Lock and unlock stay unverified until one physical PC test passes.
+The server identifies a diskless PC by MAC and hardware id on every heartbeat, because a shared CCBoot image cannot store a unique secret per PC and write-back is discarded on reboot. The server returns lock or unlock. An active session is the only unlock. Lock and unlock on a physical PC stay unverified until one diskless PC test passes.

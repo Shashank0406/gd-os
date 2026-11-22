@@ -43,7 +43,7 @@ Backups are not scripted yet. Until they exist, this stack is not ready for live
 
 ## Windows agent build, later
 
-The agent will be published from the Mac for a 64-bit Windows PC:
+The heartbeat protocol and Mac simulator exist. The Windows service is still unpublished. It will be published from the Mac for a 64-bit Windows PC:
 
 ```bash
 dotnet publish -c Release -r win-x64 --self-contained

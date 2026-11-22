@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.7.0 — PC agent protocol
+
+- A manager pairs a gaming PC by MAC address and hardware id. The mapping stays on the server.
+- The PC asks the server what to do. An active session means unlock. Anything else means lock.
+- A Mac simulator speaks the same heartbeat. It does not lock a Windows desktop.
+- The cashier floor shows No agent, Lock, or Unlock for each PC.
+
 ## 0.6.0 — Cashier screen
 
 - Staff sign in and see the floor. The cashier workstation cannot be billed.

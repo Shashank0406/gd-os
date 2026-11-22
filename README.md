@@ -25,8 +25,9 @@ Working now:
 - Customer registration and username login, plus cashier walk-in registration
 - Session start, extension, and end, with rupee charges calculated on the server
 - Cashier screen for the floor, session start, extension, and payment at the end
+- PC pairing and a heartbeat that returns lock or unlock from the server
 
-Not built yet: Windows agent.
+Not built yet: the Windows service that would actually lock a PC.
 
 ## Run the health check on this Mac
 
@@ -55,7 +56,7 @@ Windows production steps are in [DEPLOYMENT.md](DEPLOYMENT.md).
 ```
 backend/     FastAPI service
 frontend/    Cashier screen
-agent/       Windows agent (not started)
+agent/       Mac simulator for the PC heartbeat. Windows service not started
 compose.yml  API + PostgreSQL
 ```
 

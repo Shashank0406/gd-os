@@ -1,4 +1,5 @@
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
+from decimal import Decimal
 
 from fastapi.testclient import TestClient
 
@@ -7,6 +8,7 @@ from app.db.session import get_db
 from app.main import app
 from app.models.enums import BillingMode, PaymentMethod
 from app.services.access import create_user
+from app.services.reports import utilisation_for
 from app.services.sessions import end_session, start_session
 from tests.staff_client import TEST_PASSWORD, staff_client
 
@@ -85,6 +87,67 @@ def test_takings_follow_the_kolkata_day(db) -> None:
     assert empty.json()["payments"] == []
 
 
+def test_utilisation_is_time_in_use_and_splits_at_kolkata_midnight(db) -> None:
+    seed(db)
+    cashier = create_user(
+        db,
+        username="use-desk",
+        password=TEST_PASSWORD,
+        display_name="Desk",
+        role_name="CASHIER",
+        actor=None,
+    )
+    short = start_session(
+        db,
+        station_code="PC-07",
+        staff=cashier,
+        billing_mode=BillingMode.POSTPAID,
+        guest_label="Short",
+        now=MORNING_UTC,
+    )
+    ended = end_session(
+        db,
+        session_id=str(short.id),
+        staff=cashier,
+        payment_method=PaymentMethod.CASH,
+        now=MORNING_UTC + timedelta(seconds=30),
+    )
+    assert ended.final_amount_rupees == Decimal("2.50")
+    crossing = start_session(
+        db,
+        station_code="PC-12",
+        staff=cashier,
+        billing_mode=BillingMode.POSTPAID,
+        guest_label="Across midnight",
+        now=NEXT_MIDNIGHT_UTC - timedelta(minutes=10),
+    )
+    end_session(
+        db,
+        session_id=str(crossing.id),
+        staff=cashier,
+        payment_method=PaymentMethod.CASH,
+        now=NEXT_MIDNIGHT_UTC + timedelta(minutes=10),
+    )
+
+    first = utilisation_for(db, date(2026, 11, 22), now=NEXT_MIDNIGHT_UTC + timedelta(minutes=10))
+    second = utilisation_for(db, date(2026, 11, 23), now=NEXT_MIDNIGHT_UTC + timedelta(minutes=10))
+    by_code = {row["station_code"]: row for row in first["stations"]}
+    assert "CASHIER-01" not in by_code
+    assert by_code["PC-07"]["occupied_seconds"] == 30
+    assert by_code["PC-12"]["occupied_seconds"] == 600
+    assert by_code["PC-01"]["occupied_seconds"] == 0
+    next_day = {row["station_code"]: row["occupied_seconds"] for row in second["stations"]}
+    assert next_day["PC-12"] == 600
+    assert next_day["PC-07"] == 0
+
+    with staff_client(db, "CASHIER", "use-reader") as client:
+        report = client.get("/reports/utilisation?date=2026-11-22")
+    assert report.status_code == 200, report.text
+    body = report.json()
+    assert body["timezone"] == "Asia/Kolkata"
+    assert body["occupied_seconds"] == 630
+
+
 def test_customer_cannot_read_takings(db) -> None:
     seed(db)
 
@@ -105,6 +168,8 @@ def test_customer_cannot_read_takings(db) -> None:
         )
         token = registered.json()["access_token"]
         denied = client.get("/reports/takings", headers={"Authorization": f"Bearer {token}"})
+        denied_use = client.get("/reports/utilisation", headers={"Authorization": f"Bearer {token}"})
     finally:
         app.dependency_overrides.clear()
     assert denied.status_code == 401
+    assert denied_use.status_code == 401

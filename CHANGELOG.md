@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.15.0 — Station use
+
+- A café day report shows how long each billable station was occupied, in Asia/Kolkata.
+- Time is the clock, not the billed duration. A session that crosses midnight is split between the two days.
+- `CASHIER-01` is left out. The floor shows today's total and the selected station.
+
 ## 0.14.0 — Peak and off-peak rates
 
 - An admin can add a weekday, weekend, or all-week rate window in Asia/Kolkata time.

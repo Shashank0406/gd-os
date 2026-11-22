@@ -1,10 +1,10 @@
-"""Takings for one café day. The day is Asia/Kolkata, not UTC."""
+"""Takings and station use for one café day. The day is Asia/Kolkata, not UTC."""
 
-from datetime import date, datetime
+from datetime import date, datetime, time, timedelta, timezone
 from decimal import Decimal
 from zoneinfo import ZoneInfo
 
-from sqlalchemy import func, select
+from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session
 
 from app.models.enums import PaymentMethod
@@ -57,3 +57,54 @@ def takings_for(db: Session, day: date) -> dict:
         "by_method": [{"method": method.value, "amount_rupees": rupees_text(totals[method])} for method in METHODS],
         "payments": payments,
     }
+
+
+def utilisation_for(db: Session, day: date, now: datetime | None = None) -> dict:
+    moment = _utc(now)
+    day_start = datetime.combine(day, time.min, tzinfo=KOLKATA)
+    day_end = day_start + timedelta(days=1)
+    stations = list(db.scalars(select(Station).where(Station.is_billable.is_(True)).order_by(Station.code)))
+    station_ids = [station.id for station in stations]
+    sessions = []
+    if station_ids:
+        sessions = list(
+            db.scalars(
+                select(PlaySession).where(
+                    PlaySession.station_id.in_(station_ids),
+                    PlaySession.started_at < day_end,
+                    or_(PlaySession.ended_at.is_(None), PlaySession.ended_at > day_start),
+                )
+            )
+        )
+    occupied = {station.id: 0 for station in stations}
+    counts = {station.id: 0 for station in stations}
+    for play in sessions:
+        begin = _utc(play.started_at)
+        stop = _utc(play.ended_at) if play.ended_at is not None else moment
+        clip_start = max(begin, day_start)
+        clip_end = min(stop, day_end, moment)
+        if clip_end <= clip_start:
+            continue
+        occupied[play.station_id] += int((clip_end - clip_start).total_seconds())
+        counts[play.station_id] += 1
+    rows = [
+        {
+            "station_code": station.code,
+            "occupied_seconds": occupied[station.id],
+            "session_count": counts[station.id],
+        }
+        for station in stations
+    ]
+    return {
+        "date": day.isoformat(),
+        "timezone": "Asia/Kolkata",
+        "occupied_seconds": sum(occupied.values()),
+        "stations": rows,
+    }
+
+
+def _utc(moment: datetime | None) -> datetime:
+    current = moment or datetime.now(timezone.utc)
+    if current.tzinfo is None:
+        current = current.replace(tzinfo=timezone.utc)
+    return current.astimezone(timezone.utc)

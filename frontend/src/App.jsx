@@ -103,23 +103,26 @@ function Desk({ token, staffName, onSignOut, onUnauthorized }) {
   const [notice, setNotice] = useState("")
   const [receipt, setReceipt] = useState(null)
   const [takings, setTakings] = useState(null)
+  const [utilisation, setUtilisation] = useState(null)
   const [reservations, setReservations] = useState([])
   const [role, setRole] = useState("")
 
   async function reload() {
     try {
-      const [nextStations, nextSessions, nextPricing, nextTakings, nextReservations] = await Promise.all([
+      const [nextStations, nextSessions, nextPricing, nextTakings, nextReservations, nextUse] = await Promise.all([
         api("/stations", { token }),
         api("/sessions/active", { token }),
         api("/pricing", { token }),
         api("/reports/takings", { token }),
         api("/reservations", { token }),
+        api("/reports/utilisation", { token }),
       ])
       setStations(nextStations)
       setSessions(nextSessions)
       setPricing(nextPricing)
       setTakings(nextTakings)
       setReservations(nextReservations)
+      setUtilisation(nextUse)
       setError("")
     } catch (err) {
       if (err.status === 401) {
@@ -165,6 +168,7 @@ function Desk({ token, staffName, onSignOut, onUnauthorized }) {
             <p className="eyebrow">Gamers District</p>
             <h1>Floor</h1>
             {takings ? <p className="takings">{takingsLine(takings)}</p> : null}
+            {utilisation ? <p className="takings">Used today {formatUse(utilisation.occupied_seconds)}</p> : null}
           </div>
           <div>
             <span>{staffName}</span>{" "}
@@ -215,6 +219,7 @@ function Desk({ token, staffName, onSignOut, onUnauthorized }) {
             onUnauthorized={onUnauthorized}
             onNotice={setNotice}
             onReceipt={setReceipt}
+            utilisation={utilisation}
           />
         ) : null}
         {selected && selected.is_billable && !active && selected.status === "AVAILABLE" ? (
@@ -226,6 +231,7 @@ function Desk({ token, staffName, onSignOut, onUnauthorized }) {
             onStarted={reload}
             onUnauthorized={onUnauthorized}
             onNotice={setNotice}
+            utilisation={utilisation}
           />
         ) : null}
         {selected && selected.is_billable && !active && canManage ? (
@@ -258,7 +264,7 @@ function Desk({ token, staffName, onSignOut, onUnauthorized }) {
   )
 }
 
-function StartPanel({ token, station, pricing, reservations, onStarted, onUnauthorized, onNotice }) {
+function StartPanel({ token, station, pricing, reservations, utilisation, onStarted, onUnauthorized, onNotice }) {
   const [who, setWho] = useState("guest")
   const [guestLabel, setGuestLabel] = useState("")
   const [mobile, setMobile] = useState("")
@@ -425,6 +431,7 @@ function StartPanel({ token, station, pricing, reservations, onStarted, onUnauth
           {plan ? `₹${shownRate(plan)} / hour` : "No hourly price"}
           {plan?.effective_label ? ` · ${plan.effective_label}` : ""}
         </p>
+        <p>Used today {formatUse(usedSeconds(utilisation, station.code))}</p>
         {held ? <p>Reserved now for {held.holder_name}.</p> : null}
       </div>
       <label>
@@ -734,7 +741,7 @@ function Receipt({ slip }) {
   )
 }
 
-function SessionPanel({ token, session, onChanged, onUnauthorized, onNotice, onReceipt }) {
+function SessionPanel({ token, session, onChanged, onUnauthorized, onNotice, onReceipt, utilisation }) {
   const [due, setDue] = useState(null)
   const [extendFor, setExtendFor] = useState(1800)
   const [method, setMethod] = useState("CASH")
@@ -827,6 +834,7 @@ function SessionPanel({ token, session, onChanged, onUnauthorized, onNotice, onR
           {elapsed} · ₹{session.hourly_rate_rupees}/hour
           {session.package_code ? ` · ${session.package_code}` : ""}
         </p>
+        <p>Used today {formatUse(usedSeconds(utilisation, session.station_code))}</p>
       </div>
       {due ? (
         <p className="money">
@@ -870,6 +878,22 @@ function MethodPicker({ method, onChange }) {
 function coveringReservation(reservations) {
   const now = Date.now()
   return reservations.find((item) => Date.parse(item.starts_at_utc) <= now && now < Date.parse(item.ends_at_utc))
+}
+
+function usedSeconds(utilisation, stationCode) {
+  const row = utilisation?.stations?.find((item) => item.station_code === stationCode)
+  return row ? row.occupied_seconds : 0
+}
+
+function formatUse(seconds) {
+  const total = Math.max(0, seconds || 0)
+  const hours = Math.floor(total / 3600)
+  const minutes = Math.floor((total % 3600) / 60)
+  const rest = total % 60
+  if (hours > 0) {
+    return `${hours}h ${minutes}m`
+  }
+  return `${minutes}m ${String(rest).padStart(2, "0")}s`
 }
 
 function takingsLine(takings) {

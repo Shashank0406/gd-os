@@ -38,7 +38,7 @@ Money is stored in rupees with two decimal places (`numeric(12,2)`). ₹150 is `
 
 ## Station rule
 
-`CASHIER-01` is an admin workstation. It is not a billable gaming station and is excluded from utilisation.
+`CASHIER-01` is an admin workstation. It is not a billable gaming station and is excluded from utilisation. Utilisation is occupied time on the Asia/Kolkata day, not the billed amount.
 
 ## Boundaries for later modules
 

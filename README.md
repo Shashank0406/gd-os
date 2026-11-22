@@ -33,6 +33,7 @@ Working now:
 - Maintenance and disabled stations, which stay out of play until a manager returns them
 - A Windows PC agent that covers the desktop when the server says lock, and hides that cover when a session is active
 - Peak and off-peak hourly rates for new sessions, in Asia/Kolkata time
+- Station use for the Asia/Kolkata day, separate from the amount billed
 
 The Windows cover has not been tried on a diskless PC. The Mac build only prints `LOCK` or `UNLOCK`.
 

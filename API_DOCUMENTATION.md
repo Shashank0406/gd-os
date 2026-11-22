@@ -105,6 +105,10 @@ Requires `sessions.read`. Lists scheduled holds that have not ended, through the
 
 Requires `sessions.operate`. Cancels a scheduled hold.
 
+## GET /reports/utilisation
+
+Requires `sessions.read`. Optional `date` is `YYYY-MM-DD` in Asia/Kolkata. Each billable station has `occupied_seconds` for that day. An open session is counted up to the server clock. A session that crosses midnight is split. `CASHIER-01` is omitted. Occupied time is not the billed duration.
+
 ## GET /reports/takings
 
 Requires `sessions.read`. Optional `date` is `YYYY-MM-DD`. When it is omitted, the date is today in Asia/Kolkata. The total is the sum of payments recorded on that local day. A payment just before midnight stays on that day, and one at midnight belongs to the next day.

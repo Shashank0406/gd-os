@@ -25,7 +25,7 @@ settings = get_settings()
 app = FastAPI(
     title="GD OS",
     summary="Gamers District Operating System",
-    version="0.14.0",
+    version="0.15.0",
 )
 app.include_router(auth_router)
 app.include_router(customers_router)

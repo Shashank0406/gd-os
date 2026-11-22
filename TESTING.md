@@ -32,6 +32,8 @@ Evidence for the current milestone only. A passing health check is not productio
 | Windows agent applies unlock only when the server says so, covers on failure, and reads a heartbeat | Passed on the Mac, 23 Nov 2026. `dotnet test`: 5 passed. `gdos-agent.exe` published as a 64-bit Windows program. One live heartbeat printed `PC-01 LOCK`. The Mac run did not cover a desktop. | `agent/windows` |
 | Peak window prices a new session, off-peak keeps the plan rate, overlap is rejected, and a cashier cannot add a window | Passed on the Mac, 23 Nov 2026. `pytest`: 52 passed. One peak minute of ₹200.00 was ₹3.33. | `backend/tests/test_schedules.py` |
 | Admin saves a weekday 18:00–23:00 window, the current rate stays ₹150.00, then the window is removed | Passed on the Mac, 23 Nov 2026. The panel listed Weekday peak at ₹200.00 and the start price stayed ₹150.00. Remove cleared it, so the live floor was not left on the peak rate. | `http://localhost:8000` |
+| Station use follows the clock, splits at Kolkata midnight, bills the 60-second minimum separately, and hides the cashier | Passed on the Mac, 23 Nov 2026. `pytest`: 53 passed. Thirty seconds on PC-07 was 30 occupied seconds and a ₹2.50 bill. | `backend/tests/test_reports.py` |
+| Floor shows today's use, and PC-15 moves off zero after a short session | Passed on the Mac, 23 Nov 2026. PC-15 showed Used today 0m 00s, then 0m 09s, while the bill stayed ₹2.50. PC-15 was free again. | `http://localhost:8000` |
 
 ## Not run
 

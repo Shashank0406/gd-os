@@ -31,12 +31,16 @@ class PricingPlanOut(BaseModel):
     device_type: DeviceType
     station_id: uuid.UUID | None
     hourly_rate_rupees: Decimal
+    effective_hourly_rate_rupees: Decimal | None = None
+    effective_label: str | None = None
     billing_increment_seconds: int
     minimum_duration_seconds: int
     is_active: bool
 
-    @field_serializer("hourly_rate_rupees")
-    def serialize_hourly_rate(self, value: Decimal) -> str:
+    @field_serializer("hourly_rate_rupees", "effective_hourly_rate_rupees")
+    def serialize_hourly_rate(self, value: Decimal | None) -> str | None:
+        if value is None:
+            return None
         return rupees_text(value)
 
 
@@ -57,7 +61,19 @@ class PackageOut(BaseModel):
         return rupees_text(value)
 
 
+class ScheduleOut(BaseModel):
+    id: uuid.UUID
+    pricing_plan_id: uuid.UUID
+    label: str
+    days_of_week: str
+    start_local_time: str
+    end_local_time: str
+    hourly_rate_rupees: str
+    is_active: bool
+
+
 class CatalogOut(BaseModel):
     plans: list[PricingPlanOut]
     packages: list[PackageOut]
+    schedules: list[ScheduleOut]
     schedule_count: int

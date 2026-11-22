@@ -117,6 +117,16 @@ Requires a staff token with `stations.read`. Returns the 21 seeded stations. `CA
 
 Requires `pricing.read`. `hourly_rate_rupees` and `price_rupees` are rupee strings with two decimal places, such as `"150.00"`.
 
+## POST /pricing/plans/{id}/schedules
+
+Requires `pricing.write`. Body: `label`, `days_of_week` as Monday `1` through Sunday `7`, `start_local_time`, `end_local_time`, and `hourly_rate_rupees`. Times are Asia/Kolkata and the end is exclusive. An overlap on the same plan returns 409. A cashier returns 403.
+
+A new session uses the matching schedule rate. Outside every window it uses the plan rate. A session that has already started keeps its saved rate. Package prices are unchanged.
+
+## POST /pricing/schedules/{id}/deactivate
+
+Requires `pricing.write`. The window stops applying to new sessions.
+
 ## PATCH /pricing/plans/{id}
 
 Requires `pricing.write`. Body: `{"hourly_rate_rupees": "180.00"}`. The previous and new rupee amounts are stored in `price_change_log` and `audit_logs`. A cashier token receives `403`.

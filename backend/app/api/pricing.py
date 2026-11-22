@@ -1,18 +1,20 @@
 import uuid
+from datetime import datetime, time, timezone
 from decimal import Decimal
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, field_validator
-from sqlalchemy import func, select
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.api.deps import require_permission
 from app.db.session import get_db
 from app.models.identity import User
 from app.models.pricing import Package, PriceChangeLog, PricingPlan, PricingSchedule
-from app.schemas.catalog import CatalogOut, PricingPlanOut
+from app.schemas.catalog import CatalogOut, PricingPlanOut, ScheduleOut
 from app.schemas.money import rupees, rupees_text
 from app.services.access import record_audit
+from app.services.pricing import PricingError, create_schedule, deactivate_schedule, hourly_rate_at
 
 router = APIRouter(tags=["pricing"])
 
@@ -29,6 +31,34 @@ class PlanPriceIn(BaseModel):
         return amount
 
 
+class ScheduleIn(BaseModel):
+    label: str
+    days_of_week: list[int]
+    start_local_time: time
+    end_local_time: time
+    hourly_rate_rupees: Decimal
+
+
+def _call(action):
+    try:
+        return action()
+    except PricingError as exc:
+        raise HTTPException(status_code=exc.status_code, detail=exc.detail) from exc
+
+
+def _schedule_out(schedule: PricingSchedule) -> ScheduleOut:
+    return ScheduleOut(
+        id=schedule.id,
+        pricing_plan_id=schedule.pricing_plan_id,
+        label=schedule.label,
+        days_of_week=schedule.days_of_week,
+        start_local_time=schedule.start_local_time.strftime("%H:%M"),
+        end_local_time=schedule.end_local_time.strftime("%H:%M"),
+        hourly_rate_rupees=rupees_text(schedule.hourly_rate_rupees),
+        is_active=schedule.is_active,
+    )
+
+
 @router.get("/pricing", response_model=CatalogOut)
 def get_pricing(
     db: Session = Depends(get_db),
@@ -36,8 +66,28 @@ def get_pricing(
 ) -> CatalogOut:
     plans = list(db.scalars(select(PricingPlan).order_by(PricingPlan.device_type, PricingPlan.name)))
     packages = list(db.scalars(select(Package).order_by(Package.sort_order, Package.code)))
-    schedule_count = db.scalar(select(func.count()).select_from(PricingSchedule)) or 0
-    return CatalogOut(plans=plans, packages=packages, schedule_count=schedule_count)
+    schedules = list(
+        db.scalars(
+            select(PricingSchedule)
+            .where(PricingSchedule.is_active.is_(True))
+            .order_by(PricingSchedule.start_local_time, PricingSchedule.label)
+        )
+    )
+    now = datetime.now(timezone.utc)
+    priced: list[PricingPlanOut] = []
+    for plan in plans:
+        item = PricingPlanOut.model_validate(plan)
+        try:
+            rate, label = hourly_rate_at(db, plan, now)
+        except PricingError:
+            rate, label = rupees(plan.hourly_rate_rupees), None
+        priced.append(item.model_copy(update={"effective_hourly_rate_rupees": rate, "effective_label": label}))
+    return CatalogOut(
+        plans=priced,
+        packages=packages,
+        schedules=[_schedule_out(schedule) for schedule in schedules],
+        schedule_count=len(schedules),
+    )
 
 
 @router.patch("/pricing/plans/{plan_id}", response_model=PricingPlanOut)
@@ -76,3 +126,35 @@ def update_plan_price(
         db.commit()
         db.refresh(plan)
     return plan
+
+
+@router.post("/pricing/plans/{plan_id}/schedules", response_model=ScheduleOut, status_code=201)
+def add_schedule(
+    plan_id: uuid.UUID,
+    body: ScheduleIn,
+    db: Session = Depends(get_db),
+    staff: User = Depends(require_permission("pricing.write")),
+) -> ScheduleOut:
+    schedule = _call(
+        lambda: create_schedule(
+            db,
+            plan_id=str(plan_id),
+            label=body.label,
+            days_of_week=body.days_of_week,
+            start_local_time=body.start_local_time,
+            end_local_time=body.end_local_time,
+            hourly_rate_rupees=body.hourly_rate_rupees,
+            staff=staff,
+        )
+    )
+    return _schedule_out(schedule)
+
+
+@router.post("/pricing/schedules/{schedule_id}/deactivate", response_model=ScheduleOut)
+def retire_schedule(
+    schedule_id: uuid.UUID,
+    db: Session = Depends(get_db),
+    staff: User = Depends(require_permission("pricing.write")),
+) -> ScheduleOut:
+    schedule = _call(lambda: deactivate_schedule(db, schedule_id=str(schedule_id), staff=staff))
+    return _schedule_out(schedule)

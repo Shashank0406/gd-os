@@ -30,6 +30,8 @@ Evidence for the current milestone only. A passing health check is not productio
 | Maintenance blocks play and a new reservation, an open session blocks the change, and a cashier is refused | Passed on the Mac, 23 Nov 2026. `pytest`: 49 passed. | `backend/tests/test_maintenance.py` |
 | Manager marks PC-15 as maintenance, then returns it to the floor | Passed on the Mac, 23 Nov 2026. The tile showed MAINTENANCE and "Fan check", the start panel was gone, and Return to floor made PC-15 available again. | `http://localhost:8000` |
 | Windows agent applies unlock only when the server says so, covers on failure, and reads a heartbeat | Passed on the Mac, 23 Nov 2026. `dotnet test`: 5 passed. `gdos-agent.exe` published as a 64-bit Windows program. One live heartbeat printed `PC-01 LOCK`. The Mac run did not cover a desktop. | `agent/windows` |
+| Peak window prices a new session, off-peak keeps the plan rate, overlap is rejected, and a cashier cannot add a window | Passed on the Mac, 23 Nov 2026. `pytest`: 52 passed. One peak minute of ₹200.00 was ₹3.33. | `backend/tests/test_schedules.py` |
+| Admin saves a weekday 18:00–23:00 window, the current rate stays ₹150.00, then the window is removed | Passed on the Mac, 23 Nov 2026. The panel listed Weekday peak at ₹200.00 and the start price stayed ₹150.00. Remove cleared it, so the live floor was not left on the peak rate. | `http://localhost:8000` |
 
 ## Not run
 

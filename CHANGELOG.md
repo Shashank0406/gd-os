@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.14.0 — Peak and off-peak rates
+
+- An admin can add a weekday, weekend, or all-week rate window in Asia/Kolkata time.
+- A new session uses that rate only while the window is open. An open session keeps the rate it started with.
+- A package price does not change. Overlapping windows are rejected. A cashier cannot add one.
+
 ## 0.13.0 — Windows PC agent
 
 - The PC agent asks the server on each heartbeat and applies only `LOCK` or `UNLOCK`.

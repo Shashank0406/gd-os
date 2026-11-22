@@ -8,7 +8,7 @@ The server is a Linux container image (`python:3.12-slim` and `postgres:16`), st
 
 The cashier screen is a browser application served with the API. On launch day it opens on Windows. During development it opens on the Mac against the same API. The admin screens are not built yet.
 
-The gaming-PC agent is a Windows service. It is compiled for `win-x64` and is not part of the Docker stack. A simulator will exercise the agent protocol before any diskless PC is touched.
+The gaming-PC agent is a Windows program that runs in the player session. It is compiled for `win-x64` and is not part of the Docker stack. A simulator exercises the heartbeat. The desktop cover has not been tested on a diskless PC.
 
 CCBoot remains responsible for PXE, disk images, and write-back. GD OS starts after Windows has booted.
 
@@ -29,7 +29,7 @@ PS5 consoles and racing simulators have no agent. Staff start and end those sess
 
 Money is stored in rupees with two decimal places (`numeric(12,2)`). ₹150 is `150.00`. Decimal arithmetic is used so amounts are not binary floats. A session copies the hourly rate, increment, minimum, and package price at start.
 
-- A price edit affects new sessions only.
+- A price edit affects new sessions only. A peak or off-peak window does the same: the rate is chosen from Asia/Kolkata time at the start, then copied onto the session.
 - `started_at` and `ended_at` come from the server clock in UTC.
 - Screens show Asia/Kolkata.
 - Postpaid amount is computed once at the end: round elapsed time up to the billing increment, apply the minimum duration, then round half-up to `0.01` rupee.

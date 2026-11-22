@@ -152,6 +152,7 @@ function Desk({ token, staffName, onSignOut, onUnauthorized }) {
   }, [token])
 
   const canManage = role === "SUPER_ADMIN" || role === "MANAGER"
+  const canPrice = role === "SUPER_ADMIN"
 
   const selected = stations.find((station) => station.code === selectedCode) || null
   const active = sessions.find((session) => session.station_code === selectedCode) || null
@@ -241,6 +242,15 @@ function Desk({ token, staffName, onSignOut, onUnauthorized }) {
             {selected.maintenance_reason ? ` ${selected.maintenance_reason}` : ""}
           </p>
         ) : null}
+        {selected && selected.is_billable && canPrice ? (
+          <SchedulePanel
+            token={token}
+            station={selected}
+            pricing={pricing}
+            onChanged={reload}
+            onUnauthorized={onUnauthorized}
+          />
+        ) : null}
         {receipt ? <Receipt slip={receipt} /> : null}
         {notice ? <div className="receipt">{notice}</div> : null}
       </section>
@@ -267,7 +277,7 @@ function StartPanel({ token, station, pricing, reservations, onStarted, onUnauth
   const usesPackage = mode === "PACKAGE_NOW" || mode === "PACKAGE_LATER"
   const dueNow =
     mode === "PREPAID" && plan
-      ? prepaidDue(plan.hourly_rate_rupees, duration, plan.billing_increment_seconds, plan.minimum_duration_seconds)
+      ? prepaidDue(shownRate(plan), duration, plan.billing_increment_seconds, plan.minimum_duration_seconds)
       : mode === "PACKAGE_NOW"
         ? packages.find((item) => item.code === packageCode)?.price_rupees || ""
         : "0.00"
@@ -411,7 +421,10 @@ function StartPanel({ token, station, pricing, reservations, onStarted, onUnauth
       <div>
         <p className="eyebrow">{station.code}</p>
         <h2>Start session</h2>
-        <p>{plan ? `₹${plan.hourly_rate_rupees} / hour` : "No hourly price"}</p>
+        <p>
+          {plan ? `₹${shownRate(plan)} / hour` : "No hourly price"}
+          {plan?.effective_label ? ` · ${plan.effective_label}` : ""}
+        </p>
         {held ? <p>Reserved now for {held.holder_name}.</p> : null}
       </div>
       <label>
@@ -593,6 +606,114 @@ function StatusControls({ token, station, onChanged, onUnauthorized }) {
   )
 }
 
+function SchedulePanel({ token, station, pricing, onChanged, onUnauthorized }) {
+  const plan = planFor(pricing.plans, station)
+  const schedules = (pricing.schedules || []).filter((item) => item.pricing_plan_id === plan?.id)
+  const [label, setLabel] = useState("Weekday peak")
+  const [days, setDays] = useState("1,2,3,4,5")
+  const [start, setStart] = useState("18:00")
+  const [end, setEnd] = useState("23:00")
+  const [rate, setRate] = useState("200.00")
+  const [error, setError] = useState("")
+  const [busy, setBusy] = useState(false)
+
+  async function addSchedule(event) {
+    event.preventDefault()
+    if (!plan) {
+      return
+    }
+    setBusy(true)
+    setError("")
+    try {
+      await api(`/pricing/plans/${plan.id}/schedules`, {
+        method: "POST",
+        token,
+        body: {
+          label,
+          days_of_week: days.split(",").map((day) => Number(day)),
+          start_local_time: start,
+          end_local_time: end,
+          hourly_rate_rupees: rate,
+        },
+      })
+      await onChanged()
+    } catch (err) {
+      if (err.status === 401) {
+        onUnauthorized()
+        return
+      }
+      setError(err.message)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function deactivate(schedule) {
+    setBusy(true)
+    setError("")
+    try {
+      await api(`/pricing/schedules/${schedule.id}/deactivate`, { method: "POST", token })
+      await onChanged()
+    } catch (err) {
+      if (err.status === 401) {
+        onUnauthorized()
+        return
+      }
+      setError(err.message)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  if (!plan) {
+    return null
+  }
+  return (
+    <form className="stack" onSubmit={addSchedule}>
+      <p className="eyebrow">Peak rate</p>
+      <label>
+        Name
+        <input value={label} onChange={(event) => setLabel(event.target.value)} />
+      </label>
+      <div className="choices">
+        {[
+          ["1,2,3,4,5", "Weekdays"],
+          ["6,7", "Weekend"],
+          ["1,2,3,4,5,6,7", "Every day"],
+        ].map(([value, name]) => (
+          <button key={value} type="button" className={days === value ? "selected" : ""} onClick={() => setDays(value)}>
+            {name}
+          </button>
+        ))}
+      </div>
+      <label>
+        From
+        <input type="time" value={start} onChange={(event) => setStart(event.target.value)} />
+      </label>
+      <label>
+        Until
+        <input type="time" value={end} onChange={(event) => setEnd(event.target.value)} />
+      </label>
+      <label>
+        Hourly rate
+        <input value={rate} onChange={(event) => setRate(event.target.value)} />
+      </label>
+      <button type="submit" disabled={busy || !label.trim() || !rate.trim()}>
+        Save rate window
+      </button>
+      {schedules.map((schedule) => (
+        <p key={schedule.id}>
+          {schedule.label} · {schedule.start_local_time}–{schedule.end_local_time} · ₹{schedule.hourly_rate_rupees}{" "}
+          <button className="secondary" type="button" disabled={busy} onClick={() => deactivate(schedule)}>
+            Remove
+          </button>
+        </p>
+      ))}
+      {error ? <p className="error">{error}</p> : null}
+    </form>
+  )
+}
+
 function Receipt({ slip }) {
   return (
     <div className="receipt">
@@ -768,6 +889,10 @@ function stationLabel(station) {
     return `${status} · Unlock`
   }
   return status
+}
+
+function shownRate(plan) {
+  return plan.effective_hourly_rate_rupees || plan.hourly_rate_rupees
 }
 
 function planFor(plans, station) {

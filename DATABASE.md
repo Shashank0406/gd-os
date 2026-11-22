@@ -19,7 +19,7 @@ Tables in this migration:
 - `stations`
 - `pricing_plans`
 - `packages`
-- `pricing_schedules` (empty until an admin adds peak, off-peak, weekday, or weekend rates)
+- `pricing_schedules` stores peak, off-peak, weekday, or weekend rates. Days are Monday `1` through Sunday `7`. The clock is Asia/Kolkata. A new session copies the matching rate. An open session is not repriced.
 - `price_change_log`
 
 Amounts are `numeric(12,2)` rupees. Seeded once, and not overwritten if you run the seed again:

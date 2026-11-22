@@ -15,6 +15,7 @@ from app.models.pricing import Package, PricingPlan
 from app.models.station import Station
 from app.schemas.money import rupees, rupees_text
 from app.services.access import record_audit
+from app.services.pricing import PricingError, hourly_rate_at
 from app.services.billing import (
     charge_rupees,
     extension_seconds,
@@ -59,8 +60,12 @@ def start_session(
     if customer is None and not label:
         raise SessionError(422, "Choose a customer or enter a guest name")
     plan = _plan_for(db, station)
+    try:
+        hourly_rate, schedule_label = hourly_rate_at(db, plan, started_at)
+    except PricingError as exc:
+        raise SessionError(exc.status_code, exc.detail) from exc
     package = _package_for(db, station, package_code) if package_code else None
-    purchased, due_now = _opening_quote(billing_mode, plan, package, duration_seconds)
+    purchased, due_now = _opening_quote(billing_mode, plan, package, duration_seconds, hourly_rate)
     if due_now > 0 and payment_method not in {PaymentMethod.CASH, PaymentMethod.UPI, PaymentMethod.CARD}:
         raise SessionError(422, "Choose cash, UPI, or card for the amount due now")
 
@@ -73,7 +78,8 @@ def start_session(
         raise SessionError(409, "Station is not available")
 
     snapshot = {
-        "hourly_rate_rupees": rupees_text(plan.hourly_rate_rupees),
+        "hourly_rate_rupees": rupees_text(hourly_rate),
+        "schedule_label": schedule_label,
         "billing_increment_seconds": plan.billing_increment_seconds,
         "minimum_duration_seconds": plan.minimum_duration_seconds,
         "package_code": None if package is None else package.code,
@@ -90,7 +96,7 @@ def start_session(
         billing_mode=billing_mode,
         started_at=started_at,
         scheduled_end_at=None if purchased == 0 else started_at + timedelta(seconds=purchased),
-        hourly_rate_rupees=rupees(plan.hourly_rate_rupees),
+        hourly_rate_rupees=hourly_rate,
         billing_increment_seconds=plan.billing_increment_seconds,
         minimum_duration_seconds=plan.minimum_duration_seconds,
         purchased_seconds=purchased,
@@ -223,7 +229,13 @@ def amount_due_at(play: PlaySession, ended_at: datetime) -> Decimal:
     return rupees(base + charge_rupees(play.hourly_rate_rupees, extra))
 
 
-def _opening_quote(mode: BillingMode, plan: PricingPlan, package: Package | None, duration_seconds: int | None) -> tuple[int, Decimal]:
+def _opening_quote(
+    mode: BillingMode,
+    plan: PricingPlan,
+    package: Package | None,
+    duration_seconds: int | None,
+    hourly_rate: Decimal,
+) -> tuple[int, Decimal]:
     if mode == BillingMode.FREE_PLAY:
         if package is not None:
             raise SessionError(422, "Free play does not use a package")
@@ -236,7 +248,7 @@ def _opening_quote(mode: BillingMode, plan: PricingPlan, package: Package | None
         if duration_seconds is None:
             raise SessionError(422, "Prepaid hourly play needs a duration")
         purchased = prepaid_purchase_seconds(duration_seconds, plan.billing_increment_seconds, plan.minimum_duration_seconds)
-        return purchased, charge_rupees(plan.hourly_rate_rupees, purchased)
+        return purchased, charge_rupees(hourly_rate, purchased)
     return 0, ZERO
 
 

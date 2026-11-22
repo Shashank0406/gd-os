@@ -173,6 +173,11 @@ p {
   box-shadow: inset 3px 0 var(--busy);
 }
 
+.tile.MAINTENANCE,
+.tile.DISABLED {
+  box-shadow: inset 3px 0 var(--danger);
+}
+
 .stack {
   display: grid;
   gap: 0.8rem;

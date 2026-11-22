@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.12.0 — Station maintenance
+
+- A manager can mark a station as maintenance or disabled, with a reason. A cashier cannot.
+- That station cannot start a session or take a new reservation until it is returned to the floor.
+- An open session has to be closed first. Closing a session does not clear maintenance.
+
 ## 0.11.0 — Session receipt
 
 - A closed session has a receipt: station, guest, Kolkata times, rate, payments, and the final rupee amount.

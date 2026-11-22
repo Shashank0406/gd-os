@@ -104,6 +104,7 @@ function Desk({ token, staffName, onSignOut, onUnauthorized }) {
   const [receipt, setReceipt] = useState(null)
   const [takings, setTakings] = useState(null)
   const [reservations, setReservations] = useState([])
+  const [role, setRole] = useState("")
 
   async function reload() {
     try {
@@ -130,10 +131,27 @@ function Desk({ token, staffName, onSignOut, onUnauthorized }) {
   }
 
   useEffect(() => {
+    let stopped = false
+    api("/auth/me", { token })
+      .then((me) => {
+        if (!stopped) {
+          setRole(me.role)
+        }
+      })
+      .catch((err) => {
+        if (err.status === 401) {
+          onUnauthorized()
+        }
+      })
     reload()
     const timer = setInterval(reload, 10000)
-    return () => clearInterval(timer)
+    return () => {
+      stopped = true
+      clearInterval(timer)
+    }
   }, [token])
+
+  const canManage = role === "SUPER_ADMIN" || role === "MANAGER"
 
   const selected = stations.find((station) => station.code === selectedCode) || null
   const active = sessions.find((session) => session.station_code === selectedCode) || null
@@ -209,8 +227,19 @@ function Desk({ token, staffName, onSignOut, onUnauthorized }) {
             onNotice={setNotice}
           />
         ) : null}
+        {selected && selected.is_billable && !active && canManage ? (
+          <StatusControls
+            token={token}
+            station={selected}
+            onChanged={reload}
+            onUnauthorized={onUnauthorized}
+          />
+        ) : null}
         {selected && selected.is_billable && !active && selected.status !== "AVAILABLE" ? (
-          <p>{selected.code} is {selected.status.replaceAll("_", " ").toLowerCase()}.</p>
+          <p>
+            {selected.code} is {selected.status.replaceAll("_", " ").toLowerCase()}.
+            {selected.maintenance_reason ? ` ${selected.maintenance_reason}` : ""}
+          </p>
         ) : null}
         {receipt ? <Receipt slip={receipt} /> : null}
         {notice ? <div className="receipt">{notice}</div> : null}
@@ -494,6 +523,73 @@ function StartPanel({ token, station, pricing, reservations, onStarted, onUnauth
         Start
       </button>
     </form>
+  )
+}
+
+function StatusControls({ token, station, onChanged, onUnauthorized }) {
+  const [reason, setReason] = useState("")
+  const [error, setError] = useState("")
+  const [busy, setBusy] = useState(false)
+  const out = station.status === "MAINTENANCE" || station.status === "DISABLED"
+
+  useEffect(() => {
+    setReason("")
+    setError("")
+  }, [station.code, station.status])
+
+  async function change(status) {
+    setBusy(true)
+    setError("")
+    try {
+      await api(`/stations/${station.code}/status`, {
+        method: "POST",
+        token,
+        body: status === "AVAILABLE" ? { status } : { status, reason },
+      })
+      await onChanged()
+    } catch (err) {
+      if (err.status === 401) {
+        onUnauthorized()
+        return
+      }
+      setError(err.message)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  if (station.status === "IN_SESSION") {
+    return null
+  }
+  if (out) {
+    return (
+      <div className="stack">
+        <button type="button" disabled={busy} onClick={() => change("AVAILABLE")}>
+          Return to floor
+        </button>
+        {error ? <p className="error">{error}</p> : null}
+      </div>
+    )
+  }
+  if (station.status !== "AVAILABLE") {
+    return null
+  }
+  return (
+    <div className="stack">
+      <label>
+        Reason
+        <input value={reason} onChange={(event) => setReason(event.target.value)} />
+      </label>
+      <div className="choices">
+        <button type="button" disabled={busy || !reason.trim()} onClick={() => change("MAINTENANCE")}>
+          Maintenance
+        </button>
+        <button type="button" disabled={busy || !reason.trim()} onClick={() => change("DISABLED")}>
+          Disable
+        </button>
+      </div>
+      {error ? <p className="error">{error}</p> : null}
+    </div>
   )
 }
 

@@ -27,6 +27,8 @@ Evidence for the current milestone only. A passing health check is not productio
 | Cashier reserves PC-14, a second hold is rejected, then the session starts from that hold and is closed | Passed on the Mac, 22 Nov 2026. The screen showed "Reserved now for Hold check" and "already reserved", then the session closed. | `http://localhost:8000` |
 | Closed session receipt, open session rejected, customer token rejected | Passed on the Mac, 22 Nov 2026. `pytest`: 46 passed. | `backend/tests/test_receipts.py` |
 | Cashier screen shows the receipt after closing PC-13 | Passed on the Mac, 22 Nov 2026. The panel showed Receipt, Receipt check, cash ₹2.50, and the final ₹2.50. PC-13 was free again. | `http://localhost:8000` |
+| Maintenance blocks play and a new reservation, an open session blocks the change, and a cashier is refused | Passed on the Mac, 23 Nov 2026. `pytest`: 49 passed. | `backend/tests/test_maintenance.py` |
+| Manager marks PC-15 as maintenance, then returns it to the floor | Passed on the Mac, 23 Nov 2026. The tile showed MAINTENANCE and "Fan check", the start panel was gone, and Return to floor made PC-15 available again. | `http://localhost:8000` |
 
 ## Not run
 

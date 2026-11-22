@@ -7,7 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.models.customer import Customer
-from app.models.enums import ReservationStatus
+from app.models.enums import ReservationStatus, StationStatus
 from app.models.identity import User
 from app.models.reservation import Reservation
 from app.models.station import Station
@@ -153,6 +153,8 @@ def _station(db: Session, code: str) -> Station:
         raise ReservationError(404, "Station not found")
     if not station.is_customer_station or not station.is_billable:
         raise ReservationError(422, "This station cannot be reserved")
+    if station.status != StationStatus.AVAILABLE:
+        raise ReservationError(409, "This station is not available")
     return station
 
 

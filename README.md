@@ -30,6 +30,7 @@ Working now:
 - Database backup and a confirmed restore that leaves the Docker volume in place
 - Station reservations that cannot overlap, shown on the cashier floor
 - A receipt for each closed session, shown after payment
+- Maintenance and disabled stations, which stay out of play until a manager returns them
 
 Not built yet: the Windows service that would actually lock a PC.
 

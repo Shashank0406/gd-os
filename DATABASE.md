@@ -41,4 +41,4 @@ Takings are not a separate table. They are the `payments` rows for one Asia/Kolk
 
 A receipt is not a separate table. It is a closed session plus the payments recorded for it.
 
-Still to add: maintenance actions.
+`MAINTENANCE` and `DISABLED` are station statuses. They are set by a manager and stored on `stations`, with `maintenance_reason`. Ending a session sets the station back to `AVAILABLE` only when it is still `IN_SESSION`, so a station taken out of play stays that way. The seed does not change an existing station's status.

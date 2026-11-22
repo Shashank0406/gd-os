@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session, joinedload
 
 from app.core.login_limit import login_limiter
 from app.core.security import create_access_token, dummy_password_hash, verify_password
+from app.api.deps import get_current_user
 from app.db.session import get_db
 from app.models.identity import User
 from app.services.access import record_audit
@@ -21,6 +22,11 @@ class TokenOut(BaseModel):
     access_token: str
     token_type: str
     expires_in: int
+    username: str
+    role: str
+
+
+class MeOut(BaseModel):
     username: str
     role: str
 
@@ -64,3 +70,8 @@ def login(body: LoginIn, request: Request, db: Session = Depends(get_db)) -> Tok
         username=user.username,
         role=user.role.name,
     )
+
+
+@router.get("/me", response_model=MeOut)
+def me(user: User = Depends(get_current_user)) -> MeOut:
+    return MeOut(username=user.username, role=user.role.name)

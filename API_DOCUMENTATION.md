@@ -77,6 +77,14 @@ Closes the session using the server clock. The final rupee amount uses the price
 
 Requires `sessions.read`. Lists sessions that are still open.
 
+## POST /stations/{code}/status
+
+Requires `stations.manage`. Body: `status` of `MAINTENANCE`, `DISABLED`, or `AVAILABLE`. Maintenance and disabled need a `reason`. An open session returns 409. `CASHIER-01` returns 422. A cashier returns 403. Returning a station to `AVAILABLE` clears the reason.
+
+## GET /auth/me
+
+Requires a staff token. Returns the username and role.
+
 ## POST /stations/{code}/agent
 
 Requires `stations.manage`. A manager pairs a gaming PC. PS5s, simulators, and `CASHIER-01` are rejected. The MAC address and hardware id must not already belong to another station.

@@ -28,6 +28,7 @@ class StartIn(BaseModel):
     package_code: str | None = None
     duration_seconds: int | None = None
     payment_method: PaymentMethod | None = None
+    reservation_id: uuid.UUID | None = None
 
 
 class ExtendIn(BaseModel):
@@ -119,6 +120,7 @@ def start(
             package_code=body.package_code,
             duration_seconds=body.duration_seconds,
             payment_method=body.payment_method,
+            reservation_id=None if body.reservation_id is None else str(body.reservation_id),
         ),
     )
     return _out(db, play)

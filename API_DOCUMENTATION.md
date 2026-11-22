@@ -55,7 +55,7 @@ Requires `customers.read`. Accepts `9876543210` or `+91 9876543210` and returns 
 
 ## POST /sessions
 
-Requires `sessions.operate`. Starts a session on an available customer station. `CASHIER-01` is rejected. `billing_mode` is `POSTPAID`, `PREPAID`, or `FREE_PLAY`. Prepaid hourly needs `duration_seconds` and a payment method. A package needs `package_code`. The response includes the saved hourly rate and the start time in UTC and Asia/Kolkata.
+Requires `sessions.operate`. Starts a session on an available customer station. `CASHIER-01` is rejected. `billing_mode` is `POSTPAID`, `PREPAID`, or `FREE_PLAY`. Prepaid hourly needs `duration_seconds` and a payment method. A package needs `package_code`. If a reservation covers the start time, `reservation_id` is required. The response includes the saved hourly rate and the start time in UTC and Asia/Kolkata.
 
 ## GET /sessions/{id}/due
 
@@ -80,6 +80,18 @@ Requires `stations.manage`. A manager pairs a gaming PC. PS5s, simulators, and `
 ## POST /agent/heartbeat
 
 No staff token. The body is the PC's MAC address and hardware id. The response is `LOCK` or `UNLOCK`. `UNLOCK` means that station has an active session. A PC cannot send the amount to charge or the action it wants.
+
+## POST /reservations
+
+Requires `sessions.operate`. Holds a billable station for a guest or customer. `starts_at` is an ISO time. `duration_seconds` is from 1800 to 43200. Overlapping holds on the same station return 409. The cashier workstation is rejected.
+
+## GET /reservations
+
+Requires `sessions.read`. Lists scheduled holds that have not ended, through the next two days. Times are UTC and Asia/Kolkata.
+
+## POST /reservations/{id}/cancel
+
+Requires `sessions.operate`. Cancels a scheduled hold.
 
 ## GET /reports/takings
 

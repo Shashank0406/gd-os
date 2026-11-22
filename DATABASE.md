@@ -12,6 +12,7 @@ Migrations:
 - `0004_customers` adds customer accounts. Login is username and password. Mobile is stored for cashier lookup.
 - `0005_sessions` adds sessions, extensions, and payments. Active sessions are unique per station and per customer.
 - `0006_station_agents` pairs one gaming PC to a MAC address and a hardware id.
+- `0007_reservations` holds a station for a time range. Scheduled holds on one station cannot overlap.
 
 Tables in this migration:
 
@@ -38,4 +39,4 @@ Staff roles are `SUPER_ADMIN`, `MANAGER`, and `CASHIER`. A user has one role. Pe
 
 Takings are not a separate table. They are the `payments` rows for one Asia/Kolkata calendar day. Session timestamps are `timestamptz` in UTC.
 
-Still to add: reservations, receipts, and maintenance actions.
+Still to add: receipts and maintenance actions.

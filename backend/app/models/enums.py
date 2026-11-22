@@ -28,6 +28,12 @@ class SessionStatus(str, Enum):
     ENDED = "ENDED"
 
 
+class ReservationStatus(str, Enum):
+    SCHEDULED = "SCHEDULED"
+    STARTED = "STARTED"
+    CANCELLED = "CANCELLED"
+
+
 class PaymentMethod(str, Enum):
     CASH = "CASH"
     UPI = "UPI"

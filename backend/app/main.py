@@ -12,6 +12,7 @@ from app.api.audit import router as audit_router
 from app.api.auth import router as auth_router
 from app.api.customers import router as customers_router
 from app.api.pricing import router as pricing_router
+from app.api.reservations import router as reservations_router
 from app.api.reports import router as reports_router
 from app.api.sessions import router as sessions_router
 from app.api.staff import router as staff_router
@@ -24,7 +25,7 @@ settings = get_settings()
 app = FastAPI(
     title="GD OS",
     summary="Gamers District Operating System",
-    version="0.8.0",
+    version="0.10.0",
 )
 app.include_router(auth_router)
 app.include_router(customers_router)
@@ -35,6 +36,7 @@ app.include_router(stations_router)
 app.include_router(agent_router)
 app.include_router(pricing_router)
 app.include_router(reports_router)
+app.include_router(reservations_router)
 
 
 @app.get("/health")

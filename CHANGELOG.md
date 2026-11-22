@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.10.0 — Station reservations
+
+- A cashier can hold a station for a guest for 30 minutes to 12 hours.
+- A second booking that overlaps that window is rejected. The next booking can start when the first one ends.
+- Starting play during the hold uses that reservation. A future hold does not block play now.
+- `CASHIER-01` cannot be reserved.
+
 ## 0.9.0 — Database backup
 
 - `scripts/backup.sh` writes a SQL dump of the café database without stopping the API.

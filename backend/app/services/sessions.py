@@ -43,10 +43,17 @@ def start_session(
     package_code: str | None = None,
     duration_seconds: int | None = None,
     payment_method: PaymentMethod | None = None,
+    reservation_id: str | None = None,
     now: datetime | None = None,
 ) -> PlaySession:
+    from app.services.reservations import ReservationError, claim_for_start, mark_started
+
     started_at = _utc(now)
     station = _available_station(db, station_code)
+    try:
+        reservation = claim_for_start(db, station=station, reservation_id=reservation_id, started_at=started_at)
+    except ReservationError as exc:
+        raise SessionError(exc.status_code, exc.detail) from exc
     customer = _customer(db, customer_id) if customer_id else None
     label = guest_label.strip() if guest_label else None
     if customer is None and not label:
@@ -94,6 +101,8 @@ def start_session(
     db.add(play)
     try:
         db.flush()
+        if reservation is not None:
+            mark_started(reservation, play.id)
         if due_now > 0 and payment_method is not None:
             _record_payment(db, play, due_now, payment_method, staff, started_at)
         elif billing_mode == BillingMode.FREE_PLAY:

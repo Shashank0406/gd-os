@@ -28,6 +28,7 @@ Working now:
 - PC pairing and a heartbeat that returns lock or unlock from the server
 - Daily takings in rupees, using the Asia/Kolkata day, on the cashier floor
 - Database backup and a confirmed restore that leaves the Docker volume in place
+- Station reservations that cannot overlap, shown on the cashier floor
 
 Not built yet: the Windows service that would actually lock a PC.
 

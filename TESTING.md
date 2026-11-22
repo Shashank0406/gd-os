@@ -23,6 +23,8 @@ Evidence for the current milestone only. A passing health check is not productio
 | Takings follow the Kolkata midnight, split cash and UPI, and reject a customer token | Passed on the Mac, 22 Nov 2026. `pytest`: 41 passed. | `backend/tests/test_reports.py` |
 | Cashier floor today total rises when a session is paid | Passed on the Mac, 22 Nov 2026. The floor moved from `Today ₹157.50` to `Today ₹160.00` after a ₹2.50 cash payment on PC-03. | `http://localhost:8000` |
 | Backup, refused restore, and restore into a separate database | Passed on the Mac, 22 Nov 2026. The copy had 21 stations and the PC rate `150.00`. The live database was not replaced. | `scripts/test_backup.sh` |
+| Reservation overlap, future hold does not block play now, cashier station rejected, customer token rejected, start consumes the hold | Passed on the Mac, 22 Nov 2026. `pytest`: 44 passed. | `backend/tests/test_reservations.py` |
+| Cashier reserves PC-14, a second hold is rejected, then the session starts from that hold and is closed | Passed on the Mac, 22 Nov 2026. The screen showed "Reserved now for Hold check" and "already reserved", then the session closed. | `http://localhost:8000` |
 
 ## Not run
 

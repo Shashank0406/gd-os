@@ -102,19 +102,22 @@ function Desk({ token, staffName, onSignOut, onUnauthorized }) {
   const [error, setError] = useState("")
   const [notice, setNotice] = useState("")
   const [takings, setTakings] = useState(null)
+  const [reservations, setReservations] = useState([])
 
   async function reload() {
     try {
-      const [nextStations, nextSessions, nextPricing, nextTakings] = await Promise.all([
+      const [nextStations, nextSessions, nextPricing, nextTakings, nextReservations] = await Promise.all([
         api("/stations", { token }),
         api("/sessions/active", { token }),
         api("/pricing", { token }),
         api("/reports/takings", { token }),
+        api("/reservations", { token }),
       ])
       setStations(nextStations)
       setSessions(nextSessions)
       setPricing(nextPricing)
       setTakings(nextTakings)
+      setReservations(nextReservations)
       setError("")
     } catch (err) {
       if (err.status === 401) {
@@ -197,6 +200,7 @@ function Desk({ token, staffName, onSignOut, onUnauthorized }) {
             token={token}
             station={selected}
             pricing={pricing}
+            reservations={reservations.filter((item) => item.station_code === selected.code)}
             onStarted={reload}
             onUnauthorized={onUnauthorized}
             onNotice={setNotice}
@@ -211,7 +215,7 @@ function Desk({ token, staffName, onSignOut, onUnauthorized }) {
   )
 }
 
-function StartPanel({ token, station, pricing, onStarted, onUnauthorized, onNotice }) {
+function StartPanel({ token, station, pricing, reservations, onStarted, onUnauthorized, onNotice }) {
   const [who, setWho] = useState("guest")
   const [guestLabel, setGuestLabel] = useState("")
   const [mobile, setMobile] = useState("")
@@ -223,6 +227,7 @@ function StartPanel({ token, station, pricing, onStarted, onUnauthorized, onNoti
   const [method, setMethod] = useState("CASH")
   const [error, setError] = useState("")
   const [busy, setBusy] = useState(false)
+  const [holdName, setHoldName] = useState("")
 
   const plan = useMemo(() => planFor(pricing.plans, station), [pricing.plans, station])
   const packages = pricing.packages.filter((item) => item.device_type === station.device_type && item.is_active)
@@ -301,6 +306,10 @@ function StartPanel({ token, station, pricing, onStarted, onUnauthorized, onNoti
     if (mode === "PREPAID") {
       body.duration_seconds = duration
     }
+    const held = coveringReservation(reservations)
+    if (held) {
+      body.reservation_id = held.id
+    }
     try {
       const started = await api("/sessions", { method: "POST", token, body })
       onNotice(`${station.code} started. Paid ₹${started.amount_paid_rupees}. Rate ₹${started.hourly_rate_rupees}/hour.`)
@@ -316,13 +325,77 @@ function StartPanel({ token, station, pricing, onStarted, onUnauthorized, onNoti
     }
   }
 
+  async function reserveNow() {
+    setBusy(true)
+    setError("")
+    try {
+      const booked = await api("/reservations", {
+        method: "POST",
+        token,
+        body: {
+          station_code: station.code,
+          guest_label: holdName,
+          starts_at: new Date().toISOString(),
+          duration_seconds: 1800,
+        },
+      })
+      onNotice(`${station.code} reserved for ${booked.holder_name} until ${booked.ends_at_local}.`)
+      setHoldName("")
+      await onStarted()
+    } catch (err) {
+      if (err.status === 401) {
+        onUnauthorized()
+      } else {
+        setError(err.message)
+      }
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function cancelHold(reservation) {
+    setBusy(true)
+    setError("")
+    try {
+      await api(`/reservations/${reservation.id}/cancel`, { method: "POST", token })
+      onNotice(`${station.code} reservation for ${reservation.holder_name} cancelled.`)
+      await onStarted()
+    } catch (err) {
+      if (err.status === 401) {
+        onUnauthorized()
+      } else {
+        setError(err.message)
+      }
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const held = coveringReservation(reservations)
+
   return (
     <form className="stack" onSubmit={start}>
       <div>
         <p className="eyebrow">{station.code}</p>
         <h2>Start session</h2>
         <p>{plan ? `₹${plan.hourly_rate_rupees} / hour` : "No hourly price"}</p>
+        {held ? <p>Reserved now for {held.holder_name}.</p> : null}
       </div>
+      <label>
+        Hold for
+        <input value={holdName} onChange={(event) => setHoldName(event.target.value)} />
+      </label>
+      <button className="secondary" type="button" onClick={reserveNow} disabled={busy || !holdName.trim()}>
+        Reserve 30 min from now
+      </button>
+      {reservations.map((reservation) => (
+        <p key={reservation.id}>
+          {reservation.holder_name} · {reservation.starts_at_local.slice(11, 16)}–{reservation.ends_at_local.slice(11, 16)}{" "}
+          <button className="secondary" type="button" onClick={() => cancelHold(reservation)} disabled={busy}>
+            Cancel
+          </button>
+        </p>
+      ))}
       <div className="choices">
         <button type="button" className={who === "guest" ? "selected" : ""} onClick={() => setWho("guest")}>
           Guest
@@ -550,6 +623,11 @@ function MethodPicker({ method, onChange }) {
       ))}
     </div>
   )
+}
+
+function coveringReservation(reservations) {
+  const now = Date.now()
+  return reservations.find((item) => Date.parse(item.starts_at_utc) <= now && now < Date.parse(item.ends_at_utc))
 }
 
 function takingsLine(takings) {
